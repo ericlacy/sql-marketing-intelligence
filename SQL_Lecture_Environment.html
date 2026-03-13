@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Lecture Environment</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{--bg:#F4F7F5;--surface:#FFFFFF;--surface2:#EEF3F0;--border:#C8D6CE;--text:#1A2E22;--text2:#4A6B55;--text3:#7A9A87;--usf-green:#00543C;--usf-green-dark:#003D2B;--usf-green-light:#007A57;--usf-gold-bright:#FDBB30;--usf-gold-pale:rgba(212,150,10,.08);--tier1:#2E6EC7;--tier1bg:rgba(46,110,199,.08);--tier2:#B8860B;--tier2bg:rgba(184,134,11,.08);--tier3:#1A8A4A;--tier3bg:rgba(26,138,74,.08);--success:#1A8A4A;--error:#C0392B;--code-bg:#F0F4F1;--step-text:white;--c-select:#2E6EC7;--c-from:#1A8A4A;--c-where:#B8860B;--c-group:#9B59B6;--c-having:#C0392B;--c-order:#2C3E50;--c-cte:#6C3483;--c-window:#2E86C1;--c-sub:#B8860B;--pill-dim:#C8D6CE}
+[data-theme="dark"]{--bg:#0C1A14;--surface:#0F2219;--surface2:#153024;--border:#1E4A35;--text:#E8EDE9;--text2:#8FA99A;--text3:#5E7E6C;--usf-green:#00543C;--usf-green-dark:#003D2B;--usf-green-light:#007A57;--usf-gold-bright:#FDBB30;--usf-gold-pale:rgba(253,187,48,.12);--tier1:#5B9EEF;--tier1bg:rgba(91,158,239,.1);--tier2:#FDBB30;--tier2bg:rgba(253,187,48,.12);--tier3:#3EBF7B;--tier3bg:rgba(62,191,123,.1);--success:#3EBF7B;--error:#EF5B5B;--code-bg:#0A1610;--step-text:#0C1A14;--c-select:#5B9EEF;--c-from:#3EBF7B;--c-where:#FDBB30;--c-group:#BB86FC;--c-having:#EF5B5B;--c-order:#E8EDE9;--c-cte:#BB86FC;--c-window:#5B9EEF;--c-sub:#FDBB30;--pill-dim:#1E4A35}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.topnav{display:flex;align-items:center;gap:8px;padding:8px 20px;background:var(--usf-green);position:sticky;top:0;z-index:50}
+.topnav h1{font-size:14px;font-weight:700;color:#fff}.dtag{font-size:9px;color:var(--usf-gold-bright);background:rgba(253,187,48,.15);padding:3px 10px;border-radius:12px;font-weight:700;margin-right:auto}
+.nb{padding:5px 12px;border:none;border-radius:5px;font-family:inherit;font-size:10px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);transition:all .15s}.nb:hover{background:rgba(255,255,255,.15);color:#fff}.nb.a{color:#fff}
+.nb.a[data-tier="1"]{background:var(--tier1)}.nb.a[data-tier="2"]{background:var(--tier2);color:var(--usf-green-dark)}.nb.a[data-tier="3"]{background:var(--tier3)}
+.wbs{display:flex;gap:3px;margin-left:8px}.wb{padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:4px;background:transparent;color:rgba(255,255,255,.5);font-family:inherit;font-size:9px;font-weight:600;cursor:pointer}.wb:hover{border-color:rgba(255,255,255,.4);color:rgba(255,255,255,.8)}.wb.a{border-color:var(--usf-gold-bright);color:var(--usf-gold-bright);background:rgba(253,187,48,.12)}
+.sep{width:1px;height:18px;background:rgba(255,255,255,.15);margin:0 6px}
+.mbtn{background:none;border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;padding:3px 8px;border-radius:5px;cursor:pointer}.mbtn:hover{background:rgba(255,255,255,.1)}
+.ms{display:flex;flex-direction:column;height:calc(100vh - 41px);overflow:hidden}
+.sp{background:var(--surface);flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;height:280px;min-height:80px;max-height:70vh}
+.sp.collapsed{height:auto;min-height:auto;max-height:auto}
+.sp.collapsed .sql-body{display:none}
+.sph{padding:7px 20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;flex-shrink:0}
+.sph:hover{color:var(--text2)}
+.sph .tog{margin-left:auto;font-size:12px;transition:transform .2s}.sp.collapsed .sph .tog{transform:rotate(180deg)}
+.sql-body{display:flex;flex-direction:column;flex:1;overflow:hidden;padding:0 20px}
+textarea.se{width:100%;min-height:50px;height:80px;padding:8px 10px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;resize:vertical;outline:none;tab-size:2;flex-shrink:0;margin-bottom:6px}
+textarea.se:focus{border-color:var(--usf-green)}[data-theme="dark"] textarea.se:focus{border-color:var(--usf-gold-bright)}
+.sc{display:flex;gap:6px;align-items:center;flex-shrink:0;margin-bottom:6px}
+.sb{padding:5px 12px;border:none;border-radius:5px;font-family:inherit;font-size:10.5px;font-weight:600;cursor:pointer;transition:all .15s}
+.sbr{background:var(--usf-green);color:#fff}.sbr:hover{background:var(--usf-green-light)}.sbc{background:var(--surface2);color:var(--text3)}.sbc:hover{color:var(--error)}
+.sh{font-size:9px;color:var(--text3)}
+.sr{flex:1;overflow:auto;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;min-height:0}
+.sr::-webkit-scrollbar{width:4px;height:4px}.sr::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.sr table{width:100%;border-collapse:collapse}.sr th{background:var(--usf-green);color:#fff;font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:5px 8px;text-align:left;position:sticky;top:0}
+[data-theme="dark"] .sr th{background:var(--usf-green-dark);color:var(--usf-gold-bright)}
+.sr td{padding:3px 8px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10.5px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr tr:hover td{background:rgba(0,84,60,.04)}[data-theme="dark"] .sr tr:hover td{background:rgba(0,84,60,.12)}
+.sr .sinf{padding:12px;color:var(--text3);font-size:11px;font-style:italic}
+.serr{color:var(--error);padding:6px 10px;background:rgba(192,57,43,.06);border-radius:4px;font-size:11px;margin:6px}.rct{font-size:10px;color:var(--text3);padding:2px 8px}
+.drag-handle{height:6px;cursor:ns-resize;background:var(--border);flex-shrink:0;position:relative;transition:background .15s}
+.drag-handle:hover,.drag-handle.active{background:var(--usf-green)}
+[data-theme="dark"] .drag-handle:hover,[data-theme="dark"] .drag-handle.active{background:var(--usf-gold-bright)}
+.drag-handle::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:40px;height:2px;background:var(--surface);border-radius:1px}
+.lp{flex:1;overflow-y:auto;padding:24px 28px 40px;min-height:0}.lp::-webkit-scrollbar{width:4px}.lp::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.lb{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 10px;border-radius:20px;margin-bottom:8px}
+.lb.t1{background:var(--tier1bg);color:var(--tier1)}.lb.t2{background:var(--tier2bg);color:var(--tier2)}.lb.t3{background:var(--tier3bg);color:var(--tier3)}
+.lt{font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}.ls{font-size:12px;color:var(--text2);margin-bottom:20px;line-height:1.5}
+.ab{display:flex;gap:4px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.ap{padding:4px 10px;border-radius:14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border:2px solid var(--pill-dim);color:var(--text3);transition:all .3s}
+.ap.on{color:var(--step-text);border-color:transparent}
+.ap.cs.on{background:var(--c-select)}.ap.cf.on{background:var(--c-from)}.ap.cw.on{background:var(--c-where)}.ap.cg.on{background:var(--c-group)}.ap.ch.on{background:var(--c-having)}.ap.co.on{background:var(--c-order)}
+.aa{color:var(--text3);font-size:10px;margin:0 2px}
+.stc{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.sth{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer}
+.stn{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--surface2);color:var(--text3);transition:all .2s;flex-shrink:0}
+.stc.on .stn{background:var(--usf-green);color:#fff}[data-theme="dark"] .stc.on .stn{background:var(--usf-gold-bright);color:var(--usf-green-dark)}
+.stl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:10px;color:#fff;flex-shrink:0}
+.stl.cs{background:var(--c-select)}.stl.cf{background:var(--c-from)}.stl.cw{background:var(--c-where)}.stl.cg{background:var(--c-group)}.stl.ch{background:var(--c-having)}.stl.co{background:var(--c-order)}.stl.ct{background:var(--c-cte)}.stl.cwn{background:var(--c-window)}.stl.csb{background:var(--c-sub)}
+.stt{font-size:12px;font-weight:600;color:var(--text)}
+.stb{padding:0 16px 14px;display:none}
+.stc.on .stb{display:block}
+.std{font-size:11.5px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.sts{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);line-height:1.65;white-space:pre-wrap;cursor:pointer;position:relative;transition:border-color .15s}
+.sts:hover{border-color:var(--usf-green)}[data-theme="dark"] .sts:hover{border-color:var(--usf-gold-bright)}
+.sts::after{content:'Click to run \2192';position:absolute;top:6px;right:10px;font-family:'DM Sans',sans-serif;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.str{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic}
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px}
+.cc h3{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--usf-green)}[data-theme="dark"] .cc h3{color:var(--usf-gold-bright)}
+.cc p{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:6px}.cc p:last-child{margin-bottom:0}
+.co2{padding:12px 16px;border-radius:8px;margin:14px 0;font-size:11.5px;line-height:1.6}
+.co2.w{background:var(--usf-gold-pale);border-left:3px solid var(--usf-gold-bright);color:var(--text)}.co2.k{background:var(--tier3bg);border-left:3px solid var(--success);color:var(--text)}.co2.d{background:rgba(192,57,43,.06);border-left:3px solid var(--error);color:var(--text)}
+.co2 strong{color:var(--usf-gold-bright)}.co2.k strong{color:var(--success)}.co2.d strong{color:var(--error)}
+.pb{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin:14px 0}
+.pb h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--usf-green);margin-bottom:8px}[data-theme="dark"] .pb h4{color:var(--usf-gold-bright)}
+.pb ol{padding-left:18px}.pb li{font-size:11.5px;color:var(--text2);margin-bottom:5px;line-height:1.5}
+.sxm{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:8px 0;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text);line-height:1.65;white-space:pre-wrap;cursor:pointer;position:relative}.sxm:hover{border-color:var(--usf-green)}[data-theme="dark"] .sxm:hover{border-color:var(--usf-gold-bright)}.sxm::after{content:'Click to run \2192';position:absolute;top:6px;right:10px;font-family:'DM Sans',sans-serif;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.sd{border:none;border-top:1px solid var(--border);margin:24px 0}
+.hdn{display:none}
+.rvl{display:inline-block;padding:4px 12px;border:1px solid var(--border);border-radius:5px;background:transparent;color:var(--text3);font-family:inherit;font-size:10px;font-weight:600;cursor:pointer;margin-top:6px}.rvl:hover{border-color:var(--usf-green);color:var(--usf-green)}[data-theme="dark"] .rvl:hover{border-color:var(--usf-gold-bright);color:var(--usf-gold-bright)}
+@media(max-width:900px){.sp{height:220px}}
+.sql-warn{padding:7px 14px;border-radius:6px;font-size:11px;line-height:1.5;margin:0 0 6px 0;background:var(--usf-gold-pale);border-left:3px solid var(--usf-gold-bright);color:var(--text);display:flex;align-items:flex-start;gap:8px}.sql-warn .warn-icon{font-size:13px;flex-shrink:0;margin-top:1px}.sql-warn strong{color:var(--usf-gold-bright)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+<h1>SQL Lecture Environment</h1><span class="dtag">&#9749; Coffee Chain</span><div class="sep"></div>
+<button class="nb a" data-tier="1" onclick="selT(1)">Tier 1</button>
+<button class="nb" data-tier="2" onclick="selT(2)">Tier 2</button>
+<button class="nb" data-tier="3" onclick="selT(3)">Tier 3</button>
+<div class="wbs" id="wbs"></div><div class="sep"></div>
+<button class="nb" id="spBtn" onclick="openSP()" style="background:rgba(253,187,48,.2);color:var(--usf-gold-bright)">&#9998; Scratchpad</button>
+<div class="sep"></div><button class="mbtn" onclick="togM()" id="mb"></button>
+</nav>
+<div class="ms">
+<div class="sp" id="sqlPanel">
+<div class="sph" onclick="document.getElementById('sqlPanel').classList.toggle('collapsed')"><span>Live SQL Editor</span><span class="sh">Ctrl+Enter to run</span><span class="tog">&#9650;</span></div>
+<div class="sql-body">
+<textarea class="se" id="ed" placeholder="Click any query block, or write your own..." spellcheck="false"></textarea>
+<div class="sc"><button class="sb sbr" onclick="run()">&#9654; Run</button><button class="sb sbc" onclick="document.getElementById('ed').value='';document.getElementById('res').innerHTML='<p class=sinf>Results appear here.</p>'">Clear</button></div>
+<div class="sr" id="res"><p class="sinf">Results appear here.</p></div>
+</div>
+</div>
+<div class="drag-handle" id="dragHandle"></div>
+<div class="lp" id="lp"></div>
+</div>
+<script>
+let db=null;
+const SCH=`CREATE TABLE members(member_id INTEGER PRIMARY KEY,name TEXT NOT NULL,email TEXT,tier TEXT,join_date TEXT,city TEXT,total_points REAL);CREATE TABLE menu_items(item_id INTEGER PRIMARY KEY,item_name TEXT NOT NULL,category TEXT,size TEXT,price REAL,calories INTEGER);CREATE TABLE locations(location_id INTEGER PRIMARY KEY,store_name TEXT NOT NULL,city TEXT,state TEXT,open_date TEXT,seating_capacity INTEGER);CREATE TABLE transactions(txn_id INTEGER PRIMARY KEY,member_id INTEGER,location_id INTEGER,txn_date TEXT,total_amount REAL,tip_amount REAL,order_type TEXT,payment_method TEXT);CREATE TABLE txn_items(id INTEGER PRIMARY KEY,txn_id INTEGER,item_id INTEGER,quantity INTEGER,unit_price REAL,customization TEXT);CREATE TABLE promotions(promo_id INTEGER PRIMARY KEY,promo_name TEXT NOT NULL,channel TEXT,start_date TEXT,end_date TEXT,budget REAL,target_tier TEXT);CREATE TABLE promo_touches(touch_id INTEGER PRIMARY KEY,promo_id INTEGER,member_id INTEGER,touch_date TEXT,response TEXT);`;
+function seed(db){const tiers=['Bronze','Silver','Gold'],cities=['San Francisco','Oakland','Berkeley','San Jose','Palo Alto','Walnut Creek','Mill Valley','Sausalito','Daly City','Fremont','Hayward','Sunnyvale','Mountain View','Santa Clara','Redwood City'];const fn=['Alex','Sam','Jordan','Taylor','Morgan','Casey','Riley','Avery','Quinn','Drew','Jamie','Robin','Charlie','Sage','Kai','Reese','Skyler','Dakota','Finley','Rowan','Harper','Logan','Blake','Emery','Lennox','Peyton','Hayden','Ellis','Rory','Phoenix','Kendall','Cameron','Parker','Sawyer','River','Lane','Tatum','Marlowe','Arden','Briar','Sydney','Adrian','Devin','Jesse','Corey','Dana','Shawn','Carey','Kerry','Noel','Frankie','Harley','Ashton','Remy','Milan','Dallas','Eden','Wren','Oakley','Bellamy','Zion','Nova','Lyric','Atlas','Soren','Jules','Marley','Indie','Nico','Ari','Ezra','Maya','Leo','Ivy','Cole','Nina','Max','Stella','Felix','Leah','Oscar','Naomi','Hugo','Cora','Theo','Eliza','Milo','Vera','Silas','Clara','Jasper','Iris','Caleb','Nora','Owen','Ruby','Eli','Alice','Micah','Hazel'];const ln=['Chen','Kim','Patel','Garcia','Nguyen','Williams','Brown','Lee','Martinez','Wilson','Anderson','Taylor','Thomas','Jackson','White','Harris','Clark','Lewis','Young','Allen','Sato','Muller','Johansson','Cohen','Okafor','Santos','Nakamura','Berg','Dubois','Singh','Zhang','Park','Shah','Reyes','Tran','Lopez','Gonzalez','Hernandez','Torres','Flores','Wang','Tanaka','Larsson','Fischer','Bauer','Rossi','Costa','Moreau','Jansen','Peters','Li','Yamamoto','Andersen','Keller','Weber','Meyer','Schmidt','Bianchi','Ferreira','Bakker','Lin','Ito','Hansen','Zimmerman','Richter','Romano','Almeida','Laurent','Visser','Kato','Choi','Suzuki','Olsen','Braun','Huber','Colombo','Ribeiro','Petit','Smit','Honda','Wu','Watanabe','Nilsson','Schwarz','Steiner','Greco','Cardoso','Bernard','Meijer','Endo','Xu','Takahashi','Eriksson','Lang','Schmid','Ricci','Sousa','Leroy','Brouwer','Aoki'];const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,p=a=>a[r(0,a.length-1)],dt=(y,m1,m2)=>{const m=r(m1,m2),d=r(1,28);return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;};const menu=[['House Drip','Coffee','Regular',2.95,5],['House Drip','Coffee','Large',3.75,10],['Cold Brew','Coffee','Regular',4.50,5],['Cold Brew','Coffee','Large',5.50,10],['Espresso','Espresso','Single',3.25,75],['Espresso','Espresso','Double',4.00,150],['Latte','Espresso','Regular',5.25,190],['Latte','Espresso','Large',6.25,250],['Cappuccino','Espresso','Regular',5.00,130],['Mocha','Espresso','Regular',5.75,290],['Mocha','Espresso','Large',6.75,370],['Chai Latte','Tea','Regular',5.00,240],['Matcha Latte','Tea','Regular',5.50,200],['Green Tea','Tea','Regular',2.75,0],['Earl Grey','Tea','Regular',2.75,0],['Croissant','Pastry','Regular',3.95,230],['Blueberry Muffin','Pastry','Regular',4.25,340],['Banana Bread','Pastry','Slice',3.50,280],['Scone','Pastry','Regular',3.75,310],['Cookie','Pastry','Regular',2.95,220],['Avocado Toast','Food','Regular',9.50,350],['Breakfast Sandwich','Food','Regular',8.25,420],['Yogurt Parfait','Food','Regular',6.50,280],['Caesar Wrap','Food','Regular',9.75,480],['Acai Bowl','Food','Regular',10.50,390]];menu.forEach((m,i)=>{db.run("INSERT INTO menu_items VALUES(?,?,?,?,?,?)",[i+1,m[0],m[1],m[2],m[3],m[4]]);});const sn=['Market St Flagship','Mission District','Castro','Inner Sunset','Hayes Valley','Downtown Oakland','Rockridge','Berkeley Main','San Jose Central','Palo Alto University','Walnut Creek Plaza','Mill Valley','Sausalito Waterfront','Daly City Hub','Fremont Station'];sn.forEach((s,i)=>{db.run("INSERT INTO locations VALUES(?,?,?,?,?,?)",[i+1,s,cities[i%cities.length],'CA',dt(r(2018,2022),1,12),r(20,80)]);});const mi=[];for(let i=1;i<=4000;i++){const nm=fn[(i-1)%fn.length]+' '+ln[Math.floor((i-1)/fn.length)%ln.length],em=nm.toLowerCase().replace(/ /g,'.')+i+'@email.com',tr=p(tiers),jd=dt(p([2021,2022,2023,2024]),1,12),ct=p(cities),pts=(r(50,12000)+r(0,99)/100).toFixed(2);db.run("INSERT INTO members VALUES(?,?,?,?,?,?,?)",[i,nm,em,tr,jd,ct,pts]);mi.push(i);if(i%267===0)db.run("INSERT INTO members VALUES(?,?,?,?,?,?,?)",[4000+Math.floor(i/267),nm,em.replace('@','+dup@'),tr,jd,ct,pts]);}const pn=['Happy Hour','Double Points','BOGO Espresso','Free Pastry Friday','Loyalty Launch','Summer Chill','Fall Favorites','Holiday Warmth','New Year Boost','Referral Bonus','App Exclusive','Birthday Reward','Morning Rush','Afternoon Pick-Up','Weekend Brunch','Flash Sale','Seasonal Intro','Comeback Offer','Gold Member Perk','Community Day'];const pc=['email','push_notification','in_app','sms','social'];for(let i=1;i<=20;i++){const ch=p(pc),tr=p(tiers),yr=p([2023,2024]),sm=r(1,10),sd=dt(yr,sm,sm);let em=r(sm+1,12),ey=yr;if(em>12){em-=12;ey=yr+1;}const ed=`${ey}-${String(em).padStart(2,'0')}-${String(r(1,28)).padStart(2,'0')}`;if(i===8)db.run("INSERT INTO promotions VALUES(?,?,?,?,?,?,?)",[i,pn[i-1],ch,ed,sd,r(3000,50000),tr]);else db.run("INSERT INTO promotions VALUES(?,?,?,?,?,?,?)",[i,pn[i-1],ch,sd,ed,r(3000,50000),tr]);}const ot=['dine_in','takeout','mobile','drive_thru'],pm=['credit','debit','mobile','cash'];for(let i=1;i<=15000;i++){const mid=p(mi),lid=r(1,15),td=dt(p([2023,2024]),1,12),amt=(r(3,25)+r(0,99)/100).toFixed(2),tip=Math.random()<0.25?null:(r(0,5)+r(0,99)/100).toFixed(2);db.run("INSERT INTO transactions VALUES(?,?,?,?,?,?,?,?)",[i,mid,lid,td,amt,tip,p(ot),p(pm)]);}for(let i=15001;i<=15040;i++)db.run("INSERT INTO transactions VALUES(?,?,?,?,?,?,?,?)",[i,r(8001,8040),r(1,15),dt(p([2023,2024]),1,12),(r(3,25)+r(0,99)/100).toFixed(2),null,p(ot),p(pm)]);let tiId=1;const cust=[null,null,null,'oat milk','extra shot','no foam','almond milk','half-sweet','decaf','iced',null,null,'soy milk',null,'light ice'];for(let o=1;o<=15040;o++){const n=r(1,4);for(let j=0;j<n;j++)db.run("INSERT INTO txn_items VALUES(?,?,?,?,?,?)",[tiId++,o,r(1,25),r(1,3),(r(2,10)+r(0,99)/100).toFixed(2),p(cust)]);}for(let i=1;i<=40000;i++)db.run("INSERT INTO promo_touches VALUES(?,?,?,?,?)",[i,r(1,20),p(mi),dt(p([2023,2024]),1,12),p(['redeemed','clicked','viewed','ignored','ignored','ignored','viewed','clicked'])]);for(let i=40001;i<=40080;i++)db.run("INSERT INTO promo_touches VALUES(?,?,?,?,?)",[i,r(1,20),r(8001,8040),dt(p([2023,2024]),1,12),p(['redeemed','clicked','viewed','ignored'])]);}
+
+function lintSQL(sql){const w=[];let up=sql.toUpperCase().replace(/--[^\n]*/g,'').replace(/'[^']*'/g,"''");if(/\bUNION\b/i.test(up))up=up.split(/\bUNION\b/i)[0];const aggs=/\b(COUNT|SUM|AVG|MIN|MAX)\s*\(/i;const hasGroupBy=/\bGROUP\s+BY\b/i.test(up);const hasAgg=aggs.test(up);if(hasAgg&&!hasGroupBy){const selM=up.match(/\bSELECT\b([\s\S]*?)\bFROM\b/i);if(selM){let cl=selM[1];for(let i=0;i<5;i++)cl=cl.replace(/\b\w+\s*\([^()]*\)/gi,'');cl=cl.replace(/\bCASE\b[\s\S]*?\bEND\b/gi,'').replace(/\bAS\s+\w+/gi,'');const cols=cl.split(',').map(c=>c.trim()).filter(c=>c&&c!=='*'&&!/^\d+$/.test(c)&&!/^'/.test(c)&&c.length>0);if(cols.length>0)w.push('Aggregate function without GROUP BY \u2014 non-aggregated columns may return arbitrary values. Add GROUP BY for each non-aggregated column in SELECT.');}}if(/\bHAVING\b/i.test(up)&&!hasGroupBy)w.push('HAVING without GROUP BY \u2014 HAVING filters grouped results. Did you mean WHERE?');if(/\bWHERE\b/i.test(up)&&hasGroupBy){const wm=up.match(/\bWHERE\b([\s\S]*?)(?:\bGROUP\b)/i);if(wm&&aggs.test(wm[1]))w.push('Aggregate function in WHERE \u2014 aggregates cannot be used in WHERE. Use HAVING instead.');}return w;}
+
+function fmtW(warnings){return warnings.map(w=>`<div class="sql-warn"><span class="warn-icon">\u26A0</span><div>${w}</div></div>`).join('');}
+function run(){document.getElementById('sqlPanel').classList.remove('collapsed');const sql=document.getElementById('ed').value.trim(),a=document.getElementById('res');if(!sql){a.innerHTML='<p class="sinf">Enter a query.</p>';return;}try{const res=db.exec(sql);if(!res.length){a.innerHTML='<p class="sinf">Executed. No rows.</p>';return;}const{columns,values}=res[0];let h='<table><thead><tr>';columns.forEach(c=>{h+=`<th>${esc(c)}</th>`;});h+='</tr></thead><tbody>';const s=Math.min(values.length,200);for(let i=0;i<s;i++){h+='<tr>';values[i].forEach(v=>{h+=`<td>${v===null?'<span style="opacity:.35">NULL</span>':esc(String(v))}</td>`;});h+='</tr>';}h+='</tbody></table>';h+=`<p class="rct">${values.length} row${values.length!==1?'s':''}${values.length>200?' (200 shown)':''}</p>`;const _lw=lintSQL(sql);a.innerHTML=fmtW(_lw)+h;}catch(e){a.innerHTML=`<div class="serr"><strong>Error:</strong> ${esc(e.message)}</div>`;}}
+function lr(el){document.getElementById('sqlPanel').classList.remove('collapsed');document.getElementById('ed').value=el.textContent.trim();document.getElementById('ed').focus();run();}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function togM(){const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('mb').textContent=t==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';try{localStorage.setItem('lec_theme',t);}catch(e){}}
+function togS(el){el.closest('.stc').classList.toggle('on');}
+
+function abar(on){const cls=[['cs','SELECT'],['cf','FROM / JOIN'],['cw','WHERE'],['cg','GROUP BY'],['ch','HAVING'],['co','ORDER BY']];return'<div class="ab">'+cls.map((c,i)=>{const a=on.includes(c[0])?'on':'';const ar=i<cls.length-1?'<span class="aa">\u2192</span>':'';return`<span class="ap ${c[0]} ${a}">${c[1]}</span>${ar}`;}).join('')+'</div>';}
+
+function sc(n,clause,cls,title,desc,sql,hint,open){return`<div class="stc${open?' on':''}"><div class="sth" onclick="togS(this)"><span class="stn">${n}</span><span class="stl ${cls}">${clause}</span><span class="stt">${title}</span></div><div class="stb"><p class="std">${desc}</p><div class="sts" onclick="lr(this)">${sql}</div>${hint?`<p class="str">\u2192 ${hint}</p>`:''}</div></div>`;}
+
+const L={
+'1-1':{t:'Reading the Blueprint + The Grammar of Data',s:'Part 1: ER diagram literacy. Part 2: SELECT, WHERE, ORDER BY.',tier:1,c(){return`
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 1: Reading the ER Diagram</h2>
+
+<div class="cc"><h3>The Database is a Map</h3>
+<p>Before you write a single query, you need to read the map. An Entity-Relationship (ER) diagram shows every table, every column, and every connection in the database. If you can read this diagram, you already know how to write every JOIN in the course.</p>
+<p>Our database models a <strong>Bay Area coffee chain</strong>: 15 locations, 4,000 loyalty members, 15,000 transactions, 20 promotions.</p></div>
+
+<svg viewBox="0 0 760 440" style="width:100%;height:auto;margin:10px 0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface)" xmlns="http://www.w3.org/2000/svg">
+<style>text{font-family:'DM Sans',sans-serif;fill:var(--text)}.tbl{fill:var(--surface);stroke:var(--border);stroke-width:1.5}.thd{fill:var(--usf-green)}.col{font-size:9px;fill:var(--text2)}.tn{font-size:11px;font-weight:700;fill:white}.pk{font-size:8px;font-weight:700;fill:var(--usf-gold-bright)}.fk{font-size:8px;fill:var(--c-where)}.rel{stroke:var(--usf-green);stroke-width:1.5;fill:none}.reld{stroke:var(--c-where);stroke-width:1.5;stroke-dasharray:5,3;fill:none}.card{font-size:8px;font-weight:700;fill:var(--c-where)}.warn{font-size:7px;font-weight:600;fill:var(--error)}</style>
+
+<rect class="tbl" x="10" y="10" width="160" height="155" rx="6"/>
+<rect class="thd" x="10" y="10" width="160" height="22" rx="6"/><rect class="thd" x="10" y="26" width="160" height="6"/>
+<text class="tn" x="90" y="26" text-anchor="middle">members</text>
+<text class="pk" x="18" y="46">PK</text><text class="col" x="40" y="46">member_id</text><text class="col" x="120" y="46">int</text>
+<text class="col" x="40" y="60">name</text><text class="col" x="120" y="60">text</text>
+<text class="col" x="40" y="74">tier</text><text class="col" x="120" y="74">text</text>
+<text class="col" x="40" y="88">join_date</text><text class="col" x="120" y="88">date</text>
+<text class="col" x="40" y="102">city</text><text class="col" x="120" y="102">text</text>
+<text class="col" x="40" y="116">total_points</text><text class="col" x="120" y="116">real</text>
+<text class="warn" x="90" y="152" text-anchor="middle">~15 duplicates</text>
+
+<rect class="tbl" x="250" y="10" width="180" height="155" rx="6"/>
+<rect class="thd" x="250" y="10" width="180" height="22" rx="6"/><rect class="thd" x="250" y="26" width="180" height="6"/>
+<text class="tn" x="340" y="26" text-anchor="middle">transactions</text>
+<text class="pk" x="258" y="46">PK</text><text class="col" x="280" y="46">txn_id</text><text class="col" x="380" y="46">int</text>
+<text class="fk" x="258" y="60">FK</text><text class="col" x="280" y="60">member_id</text><text class="col" x="380" y="60">int</text>
+<text class="fk" x="258" y="74">FK</text><text class="col" x="280" y="74">location_id</text><text class="col" x="380" y="74">int</text>
+<text class="col" x="280" y="88">txn_date</text><text class="col" x="380" y="88">date</text>
+<text class="col" x="280" y="102">total_amount</text><text class="col" x="380" y="102">real</text>
+<text class="col" x="280" y="116">tip_amount</text><text class="col" x="380" y="116">real</text>
+<text class="col" x="280" y="130">order_type</text><text class="col" x="380" y="130">text</text>
+<text class="warn" x="400" y="60">40 orphans</text>
+<text class="warn" x="380" y="122">~25% NULL</text>
+
+<rect class="tbl" x="510" y="10" width="160" height="115" rx="6"/>
+<rect class="thd" x="510" y="10" width="160" height="22" rx="6"/><rect class="thd" x="510" y="26" width="160" height="6"/>
+<text class="tn" x="590" y="26" text-anchor="middle">txn_items</text>
+<text class="pk" x="518" y="46">PK</text><text class="col" x="540" y="46">id</text><text class="col" x="620" y="46">int</text>
+<text class="fk" x="518" y="60">FK</text><text class="col" x="540" y="60">txn_id</text><text class="col" x="620" y="60">int</text>
+<text class="fk" x="518" y="74">FK</text><text class="col" x="540" y="74">item_id</text><text class="col" x="620" y="74">int</text>
+<text class="col" x="540" y="88">quantity</text><text class="col" x="620" y="88">int</text>
+<text class="col" x="540" y="102">customization</text><text class="col" x="620" y="102">text</text>
+
+<rect class="tbl" x="510" y="160" width="160" height="115" rx="6"/>
+<rect class="thd" x="510" y="160" width="160" height="22" rx="6"/><rect class="thd" x="510" y="176" width="160" height="6"/>
+<text class="tn" x="590" y="176" text-anchor="middle">menu_items</text>
+<text class="pk" x="518" y="196">PK</text><text class="col" x="540" y="196">item_id</text><text class="col" x="620" y="196">int</text>
+<text class="col" x="540" y="210">item_name</text><text class="col" x="620" y="210">text</text>
+<text class="col" x="540" y="224">category</text><text class="col" x="620" y="224">text</text>
+<text class="col" x="540" y="238">price</text><text class="col" x="620" y="238">real</text>
+<text class="col" x="540" y="252">calories</text><text class="col" x="620" y="252">int</text>
+
+<rect class="tbl" x="250" y="210" width="180" height="95" rx="6"/>
+<rect class="thd" x="250" y="210" width="180" height="22" rx="6"/><rect class="thd" x="250" y="226" width="180" height="6"/>
+<text class="tn" x="340" y="226" text-anchor="middle">locations</text>
+<text class="pk" x="258" y="246">PK</text><text class="col" x="280" y="246">location_id</text><text class="col" x="385" y="246">int</text>
+<text class="col" x="280" y="260">store_name</text><text class="col" x="385" y="260">text</text>
+<text class="col" x="280" y="274">city</text><text class="col" x="385" y="274">text</text>
+<text class="col" x="280" y="288">seating_capacity</text><text class="col" x="385" y="288">int</text>
+
+<rect class="tbl" x="10" y="220" width="160" height="115" rx="6"/>
+<rect class="thd" x="10" y="220" width="160" height="22" rx="6"/><rect class="thd" x="10" y="236" width="160" height="6"/>
+<text class="tn" x="90" y="236" text-anchor="middle">promotions</text>
+<text class="pk" x="18" y="256">PK</text><text class="col" x="40" y="256">promo_id</text><text class="col" x="125" y="256">int</text>
+<text class="col" x="40" y="270">promo_name</text><text class="col" x="125" y="270">text</text>
+<text class="col" x="40" y="284">start_date</text><text class="col" x="125" y="284">date</text>
+<text class="col" x="40" y="298">end_date</text><text class="col" x="125" y="298">date</text>
+<text class="col" x="40" y="312">budget</text><text class="col" x="125" y="312">real</text>
+<text class="warn" x="90" y="330" text-anchor="middle">#8: start > end</text>
+
+<rect class="tbl" x="10" y="370" width="180" height="60" rx="6"/>
+<rect class="thd" x="10" y="370" width="180" height="22" rx="6"/><rect class="thd" x="10" y="386" width="180" height="6"/>
+<text class="tn" x="100" y="386" text-anchor="middle">promo_touches</text>
+<text class="pk" x="18" y="406">PK</text><text class="col" x="40" y="406">touch_id</text>
+<text class="fk" x="18" y="420">FK</text><text class="col" x="40" y="420">promo_id, member_id, touch_date, response</text>
+
+<!-- ═══ CROW'S FOOT RELATIONSHIPS ═══ -->
+
+<!-- 1. members → transactions: HORIZONTAL, 0,1:N (dashed) -->
+<!-- Zero-or-one side (members): circle + bar -->
+<circle cx="177" cy="60" r="4.5" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="186" y1="52" x2="186" y2="68" stroke="var(--c-where)" stroke-width="1.5"/>
+<!-- Dashed line -->
+<line x1="186" y1="60" x2="241" y2="60" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3"/>
+<!-- Crow's foot (transactions, many side) -->
+<path d="M241,52 L250,60 L241,68" stroke="var(--c-where)" stroke-width="1.5" fill="none"/>
+<line x1="241" y1="60" x2="250" y2="60" stroke="var(--c-where)" stroke-width="1.5"/>
+
+<!-- 2. locations → transactions: VERTICAL, 1:N (solid) -->
+<!-- One bar (locations side, bottom) -->
+<line x1="333" y1="208" x2="347" y2="208" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="333" y1="204" x2="347" y2="204" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="340" y1="204" x2="340" y2="173" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (transactions side, top) -->
+<path d="M333,173 L340,165 L347,173" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="340" y1="173" x2="340" y2="165" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 3. transactions → txn_items: HORIZONTAL, 1:N (solid) -->
+<!-- One bar (transactions side, left) -->
+<line x1="433" y1="52" x2="433" y2="68" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="437" y1="52" x2="437" y2="68" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="437" y1="60" x2="501" y2="60" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (txn_items side, right) -->
+<path d="M501,52 L510,60 L501,68" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="501" y1="60" x2="510" y2="60" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 4. menu_items → txn_items: VERTICAL, 1:N (solid) -->
+<!-- One bar (menu_items side, top) -->
+<line x1="583" y1="162" x2="597" y2="162" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="583" y1="158" x2="597" y2="158" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="590" y1="158" x2="590" y2="133" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (txn_items side, bottom) -->
+<path d="M583,133 L590,125 L597,133" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="590" y1="133" x2="590" y2="125" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 5. promotions → promo_touches: VERTICAL, 1:N (solid) -->
+<!-- One bar (promotions side, bottom) -->
+<line x1="83" y1="337" x2="97" y2="337" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="83" y1="341" x2="97" y2="341" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="90" y1="341" x2="90" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (promo_touches side, top) -->
+<path d="M83,362 L90,370 L97,362" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="90" y1="362" x2="90" y2="370" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 6. members → promo_touches: ROUTED PATH, 0,1:N (dashed) -->
+<!-- Zero-or-one side (members): circle + bar -->
+<circle cx="177" cy="116" r="4.5" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="186" y1="109" x2="186" y2="123" stroke="var(--c-where)" stroke-width="1.5"/>
+<!-- Dashed routed line -->
+<path d="M186,116 L204,116 L204,400 L199,400" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+<!-- Crow's foot (promo_touches side, right end) -->
+<path d="M199,393 L190,400 L199,407" stroke="var(--c-where)" stroke-width="1.5" fill="none"/>
+<line x1="199" y1="400" x2="190" y2="400" stroke="var(--c-where)" stroke-width="1.5"/>
+
+<!-- ═══ LEGEND ═══ -->
+<rect x="475" y="320" width="270" height="110" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="0.5"/>
+<text x="488" y="338" style="font-size:10px;font-weight:700;fill:var(--text)">Crow's Foot Notation</text>
+
+<!-- One (mandatory) -->
+<line x1="488" y1="356" x2="530" y2="356" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="526" y1="350" x2="526" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="530" y1="350" x2="530" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<text x="538" y="360" style="font-size:9px;fill:var(--text2)">Exactly one</text>
+
+<!-- Zero-or-one -->
+<line x1="488" y1="376" x2="520" y2="376" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3"/>
+<circle cx="525" cy="376" r="4" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="530" y1="370" x2="530" y2="382" stroke="var(--c-where)" stroke-width="1.5"/>
+<text x="538" y="380" style="font-size:9px;fill:var(--text2)">Zero or one (orphans)</text>
+
+<!-- Many -->
+<line x1="488" y1="396" x2="522" y2="396" stroke="var(--usf-green)" stroke-width="1.5"/>
+<path d="M522,390 L530,396 L522,402" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="522" y1="396" x2="530" y2="396" stroke="var(--usf-green)" stroke-width="1.5"/>
+<text x="538" y="400" style="font-size:9px;fill:var(--text2)">Many</text>
+
+<!-- Data quality badge -->
+<text x="488" y="420" style="font-size:7px;font-weight:600;fill:var(--error)">⚠ ~25% NULL</text>
+<text x="545" y="420" style="font-size:9px;fill:var(--text2)">Data quality issue</text>
+</svg>
+
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Read the Diagram: Five Steps</h3>
+
+${sc(1,'TABLE','cs','Read a table box',
+'Each box is a table. The header is the table name. Inside: column names with types. <strong>PK</strong> (Primary Key) = unique identifier for each row. Every table has one.',
+'SELECT *\nFROM members\nLIMIT 5;',
+'Confirm: the columns match the diagram. member_id, name, tier, join_date, city, total_points.',true)}
+
+${sc(2,'RELATIONSHIP','cf','Read a relationship line',
+'An arrow between two tables means they share a column. <strong>FK</strong> (Foreign Key) = "this column points to a PK in another table." The line from <strong>members</strong> to <strong>transactions</strong> means transactions.member_id references members.member_id.',
+'SELECT member_id, txn_date, total_amount\nFROM transactions\nLIMIT 5;',
+'member_id is just a number here. The ER line tells you WHERE to look up the name.')}
+
+${sc(3,'CARDINALITY','cf','Read the crow\'s feet',
+'Crow\'s foot notation uses symbols at each end of the line. <strong>Double bar ||</strong> = exactly one. <strong>Fork &gt;</strong> = many. <strong>Circle + bar O|</strong> = zero or one (orphans possible). Read it left to right: one member \u2192 many transactions. The fork always points at the "many" table.',
+'SELECT member_id, COUNT(*) AS txn_count\nFROM transactions\nWHERE member_id = 42\nGROUP BY member_id;',
+'One member, N transactions. The diagram told you this before you wrote the query.')}
+
+${sc(4,'JOIN','cf','Translate a line to SQL',
+'Every relationship line IS a JOIN condition. The line from members.member_id \u2192 transactions.member_id translates directly to <code>ON m.member_id = t.member_id</code>. You never have to guess the ON clause \u2014 the diagram tells you.',
+'SELECT m.name, m.tier, t.txn_date, t.total_amount\nFROM members m\nINNER JOIN transactions t\n  ON m.member_id = t.member_id\nLIMIT 10;',
+'The diagram line became the ON clause. Every JOIN in this course works the same way.')}
+
+${sc(5,'WARNINGS','cw','Read circles and red badges',
+'A <strong>circle (O)</strong> on a relationship line means "zero" is possible \u2014 some child rows point to parents that don\'t exist (orphan records). The <strong>dashed line</strong> reinforces this. Compare: the solid double-bar from locations to transactions means every transaction has a valid location. The dashed circle-bar from members to transactions means ~40 transactions have invalid member_ids. <strong>Red badges</strong> flag data quality issues. INNER JOIN drops orphans silently. LEFT JOIN reveals them.',
+'SELECT t.txn_id, t.member_id, m.name\nFROM transactions t\nLEFT JOIN members m\n  ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;',
+'~40 orphans. The dashed line predicted this. Solid lines (like locations \u2192 transactions) have zero orphans.')}
+
+<div class="co2 k"><strong>Key Takeaway:</strong> Every JOIN you will write in this course comes from a line on this diagram. PK and FK labels tell you the ON clause. Double bars (||) mean every row matches; a circle (O) means orphans exist and INNER JOIN will silently drop rows. The crow\u2019s foot (fork) always points at the \u201Cmany\u201D table. Red badges mark data quality traps.</div>
+
+<div class="pb"><h4>Diagram Exercises</h4><ol>
+<li><strong>Trace the path:</strong> How would you get from menu_items to members? Count the crow\u2019s feet you cross. (menu_items \u2192 txn_items \u2192 transactions \u2192 members = 3 JOINs)</li>
+<li><strong>Predict the problem:</strong> The line from members to promo_touches has a circle on the members side. What does this mean? What happens with INNER JOIN? (The circle means \u201Czero\u201D is possible \u2014 80 orphan touches disappear silently)</li>
+<li><strong>Read the badge:</strong> What does "~25% NULL" on tip_amount mean for an AVG(tip_amount) calculation? (Denominator is smaller than you think)</li>
+</ol></div>
+
+<hr class="sd">
+
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 2: The Grammar of Data</h2>
+
+${abar(['cs','cf','cw'])}
+
+<div class="cc"><h3>The Query Pattern</h3><p>Every SQL query follows the same structure, clause by clause:</p>
+<p><strong style="color:var(--c-select)">SELECT</strong> \u2192 What columns to show (you read these from the table box)<br>
+<strong style="color:var(--c-from)">FROM</strong> \u2192 Which table (you pick this from the diagram)<br>
+<strong style="color:var(--c-where)">WHERE</strong> \u2192 Which rows to keep (filter on column values)<br>
+<strong style="color:var(--c-order)">ORDER BY</strong> \u2192 How to sort the result</p></div>
+
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Gold members in San Francisco, ranked by points"</h3>
+
+${sc(6,'SELECT','cs','Choose your columns',
+'Look at the members box in the ER diagram. Pick the columns you need. SELECT * shows everything; named columns show only what matters.',
+'SELECT name, tier, city, total_points\nFROM members\nLIMIT 5;',
+'All members, all tiers, all cities \u2014 no filter yet.')}
+
+${sc(7,'WHERE','cw','Filter the rows',
+'AND means both conditions must be true. Strings require single quotes. These filter on columns you can see in the diagram.',
+"SELECT name, tier, city, total_points\nFROM members\nWHERE tier = 'Gold'\n  AND city = 'San Francisco';",
+'Only Gold + San Francisco. Row count drops significantly.')}
+
+${sc(8,'ORDER BY','co','Sort the results',
+'DESC = highest first. ASC = lowest first (default).',
+"SELECT name, tier, city, total_points\nFROM members\nWHERE tier = 'Gold'\n  AND city = 'San Francisco'\nORDER BY total_points DESC;",
+'Same rows, now ranked. The complete query.')}
+
+<hr class="sd">
+
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 3: The NULL Trap</h2>
+
+<div class="cc"><h3>Live Demo</h3>
+<p>Look at the ER diagram: tip_amount has a red badge saying "~25% NULL." Let's see what that does to our queries.</p></div>
+
+<div class="sxm" onclick="lr(this)">-- Step A: Total transactions
+SELECT COUNT(*) AS total_txns FROM transactions;</div>
+<div class="sxm" onclick="lr(this)">-- Step B: Transactions with a tip
+SELECT COUNT(*) AS tipped
+FROM transactions
+WHERE tip_amount > 0;</div>
+
+<div class="co2 d"><strong>The ER diagram warned you.</strong> The red "~25% NULL" badge on tip_amount means WHERE tip_amount > 0 evaluates NULL > 0 as UNKNOWN \u2192 treated as FALSE \u2192 rows dropped silently. The diagram is not just a map of tables \u2014 it's a map of traps.</div>
+
+<div class="pb"><h4>Practice</h4><ol>
+<li>List all Espresso items sorted by price descending (read columns from menu_items box)</li>
+<li>Find mobile transactions over $15 (read columns from transactions box)</li>
+<li>Count members who joined in 2024</li>
+<li><strong>Diagram challenge:</strong> Write a query joining transactions to locations to show store_name with each transaction. Use the ER diagram to find the ON clause.</li>
+</ol></div>`;
+}},
+'1-2':{t:'Connecting Tables',s:'JOINs link separate tables into one result set.',tier:1,c(){return`
+${abar(['cs','cf'])}
+<div class="cc"><h3>Why Tables Are Separate</h3><p>"Average spend per loyalty tier?" Tier is in <strong>members</strong>. Spend is in <strong>transactions</strong>. JOIN connects them.</p></div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Transactions with member names"</h3>
+${sc(1,'FROM','cf','Start with one table','What does a raw transaction row look like?','SELECT *\nFROM transactions\nLIMIT 5;','member_id is just a number. No name.',true)}
+${sc(2,'JOIN','cf','Connect to members','INNER JOIN keeps only matched rows. Orphans dropped silently.','SELECT m.name, m.tier, t.txn_date, t.total_amount\nFROM members m\nINNER JOIN transactions t\n  ON m.member_id = t.member_id\nLIMIT 10;','~15,000 rows. Names visible. Orphans excluded.')}
+${sc(3,'LEFT JOIN','cf','Preserve unmatched rows','LEFT JOIN keeps ALL left-table rows. NULLs fill the gaps.','SELECT m.name, m.tier, t.txn_id\nFROM members m\nLEFT JOIN transactions t\n  ON m.member_id = t.member_id\nWHERE t.txn_id IS NULL\nLIMIT 20;','Members with no transactions. NULL txn_id = no match.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Find orphan transactions"</h3>
+${sc(4,'FROM','cf','Flip the join direction','Now transactions goes LEFT. This finds orders from deleted or invalid accounts.','SELECT t.txn_id, t.member_id, t.total_amount, m.name\nFROM transactions t\nLEFT JOIN members m\n  ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;','~40 orphans. INNER JOIN would silently exclude these from revenue.')}
+<div class="co2 d"><strong>~40 orphan transactions.</strong> Deleted accounts? Migration errors? INNER JOIN hides these from every report.</div>
+<div class="pb"><h4>Your Turn</h4><ol><li>Show each transaction with its store name (JOIN transactions + locations)</li><li>Find promotions with zero touches (LEFT JOIN + IS NULL)</li></ol></div>`;}},
+
+'2-3':{t:'Aggregation & KPIs',s:'GROUP BY collapses rows into summaries. HAVING filters those summaries.',tier:2,c(){return`
+${abar(['cs','cf','cw','cg','ch','co'])}
+<div class="co2 w"><strong>AI is now unlocked.</strong> Workflow: prompt \u2192 receive SQL \u2192 read clause by clause \u2192 predict output \u2192 run \u2192 compare.</div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Average spend + unique members per tier"</h3>
+${sc(1,'SELECT + FROM','cs','Start with raw joined data','Before aggregating, examine one row. What does it represent?','SELECT m.tier, m.member_id, t.total_amount\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nLIMIT 10;','One row = one transaction. A Gold member with 10 orders appears 10 times.',true)}
+${sc(2,'GROUP BY','cg','Collapse into groups','GROUP BY tier turns thousands of rows into 3 summary rows.','SELECT m.tier,\n       COUNT(*) AS txn_count\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nGROUP BY m.tier;','3 rows. But COUNT counts transactions, not unique members.')}
+${sc(3,'DISTINCT','cs','Fix the fan-out','COUNT(DISTINCT member_id) counts unique people, not repeated rows.','SELECT m.tier,\n       ROUND(AVG(t.total_amount), 2) AS avg_spend,\n       COUNT(DISTINCT m.member_id) AS unique_members,\n       COUNT(t.txn_id) AS total_txns\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nGROUP BY m.tier;','unique_members is correct now. Compare to Step 2.')}
+<div class="co2 d"><strong>The DISTINCT Trap:</strong> Without DISTINCT, Gold looks like the biggest segment. It is not \u2014 Gold members just order more often.</div>
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Promo redemption rate per campaign"</h3>
+${sc(4,'CASE WHEN','cs','Count conditionally','CASE WHEN inside COUNT isolates a specific response type.','SELECT p.promo_name,\n       COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END) AS redemptions,\n       COUNT(pt.touch_id) AS touches\nFROM promotions p\nJOIN promo_touches pt ON p.promo_id = pt.promo_id\nGROUP BY p.promo_name;','20 rows with counts. Now calculate the rate...')}
+${sc(5,'1.0 *','cs','Avoid integer division','Without 1.0 *, SQLite does integer division: anything less than 1 becomes 0.','SELECT p.promo_name,\n       COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END) AS redemptions,\n       COUNT(pt.touch_id) AS touches,\n       ROUND(1.0 * COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END)\n             / COUNT(pt.touch_id), 4) AS rate\nFROM promotions p\nJOIN promo_touches pt ON p.promo_id = pt.promo_id\nGROUP BY p.promo_name\nORDER BY rate DESC;','Remove the 1.0 * and watch every rate drop to 0.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Stores with revenue over $100K"</h3>
+${sc(6,'HAVING','ch','Filter AFTER grouping','WHERE filters rows before grouping. HAVING filters groups after aggregation. You cannot put SUM() in WHERE.','SELECT l.store_name,\n       ROUND(SUM(t.total_amount), 2) AS revenue\nFROM locations l\nJOIN transactions t ON l.location_id = t.location_id\nGROUP BY l.store_name\nHAVING SUM(t.total_amount) > 100000\nORDER BY revenue DESC;','Only stores above $100K. Move HAVING to WHERE \u2014 error.')}
+<div class="pb"><h4>Your Turn</h4><ol><li>Most popular menu item by total quantity sold</li><li>Monthly transaction count for 2024 (YYYY-MM)</li><li>Revenue per location per month</li></ol></div>`;}},
+
+'2-4':{t:'Subqueries & Comparisons',s:'Nest queries for per-group comparisons and period-over-period analysis.',tier:2,c(){return`
+${abar(['cs','cf','cw','cg'])}
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Members with points > 2x their tier average"</h3>
+${sc(1,'SUBQUERY','csb','Calculate per-tier averages first','Start with the inner query. This becomes a derived table.','SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\nFROM members\nGROUP BY tier;','3 rows \u2014 one average per tier. This is the building block.',true)}
+${sc(2,'JOIN','cf','Attach averages back to individuals','Wrap Step 1 in parentheses, alias it, JOIN back to members.','SELECT m.name, m.tier, m.total_points, ta.avg_pts\nFROM members m\nJOIN (SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\n      FROM members GROUP BY tier) ta\n  ON m.tier = ta.tier\nLIMIT 10;','Every member now has their tier average attached.')}
+${sc(3,'WHERE','cw','Filter to outliers','Compare each member to 2x their own tier average.','SELECT m.name, m.tier, m.total_points,\n       ta.avg_pts AS tier_avg\nFROM members m\nJOIN (SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\n      FROM members GROUP BY tier) ta\n  ON m.tier = ta.tier\nWHERE m.total_points > 2 * ta.avg_pts\nORDER BY m.total_points DESC;','Each compared to THEIR tier, not the overall average.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Q3 vs Q4 revenue by order type"</h3>
+${sc(4,'CASE WHEN','cs','Create pivot columns','CASE WHEN inside SUM creates side-by-side columns. ELSE 0 prevents NULL.','SELECT order_type,\n  ROUND(SUM(CASE WHEN txn_date BETWEEN \'2024-07-01\' AND \'2024-09-30\'\n      THEN total_amount ELSE 0 END), 2) AS q3,\n  ROUND(SUM(CASE WHEN txn_date BETWEEN \'2024-10-01\' AND \'2024-12-31\'\n      THEN total_amount ELSE 0 END), 2) AS q4\nFROM transactions\nGROUP BY order_type;','Side-by-side comparison. Add a change column as practice.')}
+<div class="co2 k"><strong>Any SELECT can be wrapped in parentheses and used as a FROM source.</strong> Think of it as a temporary table that exists only for this query.</div>`;}},
+
+'3-5':{t:'Advanced Patterns',s:'Window functions and CTEs \u2014 built piece by piece.',tier:3,c(){return`
+${abar(['cs','cf','cw','cg','co'])}
+<div class="co2 w"><strong>Full AI access.</strong> Every query requires annotation: why this structure, errors caught, confidence assessment.</div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Rank members by points within each tier"</h3>
+${sc(1,'SELECT','cs','Start with base data','Confirm the raw data before adding window functions.','SELECT name, tier, total_points\nFROM members\nORDER BY tier, total_points DESC\nLIMIT 15;','Sorted but no rank number yet.',true)}
+${sc(2,'WINDOW','cwn','Add RANK() with PARTITION BY','RANK() OVER (...) adds a column without collapsing rows. PARTITION BY resets per tier.','SELECT name, tier, total_points,\n       RANK() OVER (\n         PARTITION BY tier\n         ORDER BY total_points DESC\n       ) AS tier_rank\nFROM members\nORDER BY tier, tier_rank\nLIMIT 20;','Each tier starts at rank 1. Without PARTITION BY \u2192 global rank.')}
+${sc(3,'SUBQUERY','csb','Filter on window result','Cannot WHERE on a window function in the same SELECT. Wrap it.','SELECT * FROM (\n  SELECT name, tier, total_points,\n         NTILE(10) OVER (\n           PARTITION BY tier\n           ORDER BY total_points DESC\n         ) AS decile\n  FROM members\n) ranked\nWHERE decile = 1\nORDER BY tier, total_points DESC;','Top 10% per tier. The Platinum candidate list.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Month-over-month revenue growth"</h3>
+${sc(4,'CTE','ct','Step 1 \u2014 Monthly totals','WITH creates a named temporary result set. Build the foundation first.','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT * FROM monthly ORDER BY month;','12 rows. One per month. Foundation is set.')}
+${sc(5,'WINDOW','cwn','Step 2 \u2014 Add LAG()','LAG(revenue) looks at the previous row. First row is NULL (correct \u2014 no prior month).','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT month, revenue,\n       LAG(revenue) OVER (ORDER BY month) AS prev\nFROM monthly ORDER BY month;','prev is NULL for January. Do NOT use a default of 0 (causes division by zero).')}
+${sc(6,'SELECT','cs','Step 3 \u2014 Calculate growth %','The complete query.','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT month, revenue,\n       LAG(revenue) OVER (ORDER BY month) AS prev_month,\n       ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY month))\n             / LAG(revenue) OVER (ORDER BY month), 1) AS growth_pct\nFROM monthly ORDER BY month;','12 rows. January = NULL. Every other month shows % change.')}
+<div class="co2 k"><strong>CTE + Window pattern:</strong> CTE builds summarized data. Window functions compare across rows. Together they handle any time-series analysis.</div>`;}},
+
+'3-6':{t:'Data Quality Audit',s:'Defensive SQL \u2014 find what is broken before it breaks your analysis.',tier:3,c(){return`
+${abar(['cs','cf','cw','cg','ch'])}
+<div class="cc"><h3>Five Checks for Every Dataset</h3><p>Run these before starting any analysis. The issues you find here determine whether your KPIs are trustworthy.</p></div>
+${sc(1,'NULL','cs','Compare two approaches','AVG(COALESCE(x,0)) treats NULLs as zero. AVG(x) excludes NULLs. Both valid \u2014 document your choice.','SELECT\n  ROUND(AVG(COALESCE(tip_amount, 0)), 2) AS avg_nulls_as_zero,\n  ROUND(AVG(tip_amount), 2) AS avg_nulls_excluded,\n  SUM(CASE WHEN tip_amount IS NULL THEN 1 ELSE 0 END) AS null_count,\n  COUNT(*) AS total_rows\nFROM transactions;','Two different averages from the same column. Which do you report?',true)}
+${sc(2,'GROUP BY + HAVING','ch','Find duplicates','GROUP BY collapses. HAVING COUNT(*) > 1 keeps only duplicates.','SELECT name, COUNT(*) AS n,\n       GROUP_CONCAT(member_id) AS ids\nFROM members\nGROUP BY name\nHAVING COUNT(*) > 1\nORDER BY n DESC;','~15 duplicate sets.')}
+${sc(3,'WHERE','cw','Date anomalies','A promotion cannot start after it ends.','SELECT promo_id, promo_name, start_date, end_date\nFROM promotions\nWHERE start_date > end_date;','Promotion 8. One record, big downstream impact.')}
+${sc(4,'LEFT JOIN','cf','Orphan records','Same pattern from Week 2. Here it flags integrity issues.','SELECT COUNT(*) AS orphan_txns\nFROM transactions t\nLEFT JOIN members m ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;','~40 orphans. Revenue that cannot be attributed.')}
+${sc(5,'UNION ALL','cs','Complete audit in one query','Combine all checks into a single diagnostic output.','SELECT \'NULL tips\' AS issue,\n       SUM(CASE WHEN tip_amount IS NULL THEN 1 ELSE 0 END) AS count\nFROM transactions\nUNION ALL\nSELECT \'Duplicate members\',\n  (SELECT COUNT(*) FROM (\n    SELECT name FROM members GROUP BY name HAVING COUNT(*) > 1))\nUNION ALL\nSELECT \'Date anomalies\',\n  (SELECT COUNT(*) FROM promotions WHERE start_date > end_date)\nUNION ALL\nSELECT \'Orphan transactions\',\n  (SELECT COUNT(*) FROM transactions t\n   LEFT JOIN members m ON t.member_id = m.member_id\n   WHERE m.member_id IS NULL)\nUNION ALL\nSELECT \'Orphan promo touches\',\n  (SELECT COUNT(*) FROM promo_touches pt\n   LEFT JOIN members m ON pt.member_id = m.member_id\n   WHERE m.member_id IS NULL);','5-row diagnostic. Run this first on any new dataset.')}
+<div class="co2 d"><strong>These five issues account for the majority of incorrect KPIs in production analytics.</strong> The audit query should be your first query on any new dataset.</div>`;}},
+};
+
+const tw={1:[1,2],2:[3,4],3:[5,6]};let ct=1,cw=1;
+function selT(t){ct=t;document.querySelectorAll('.nb[data-tier]').forEach(b=>b.classList.toggle('a',b.dataset.tier==t));document.getElementById('spBtn').classList.remove('a');rwb();selW(tw[t][0]);}
+function openSP(){document.querySelectorAll('.nb[data-tier]').forEach(b=>b.classList.remove('a'));document.getElementById('spBtn').classList.add('a');document.getElementById('wbs').innerHTML='';document.getElementById('lp').innerHTML=`<span class="lb" style="background:var(--usf-gold-pale);color:var(--tier2)">Scratchpad</span><h2 class="lt">Free-Form SQL</h2><p class="ls">Write and run any SQL against the Coffee Chain database. No structure, no grading.</p><div class="cc"><h3>Tables</h3><p>members \u2022 transactions \u2022 txn_items \u2022 menu_items \u2022 locations \u2022 promotions \u2022 promo_touches</p></div><div class="sxm" onclick="lr(this)">SELECT * FROM members LIMIT 10;</div><div class="sxm" onclick="lr(this)">SELECT * FROM transactions LIMIT 10;</div><div class="sxm" onclick="lr(this)">SELECT * FROM menu_items;</div><div class="sxm" onclick="lr(this)">SELECT * FROM locations;</div><div class="sxm" onclick="lr(this)">SELECT * FROM promotions;</div>`;}
+function rwb(){const c=document.getElementById('wbs');c.innerHTML='';tw[ct].forEach(w=>{const b=document.createElement('button');b.className='wb'+(w===cw?' a':'');b.textContent=`Week ${w}`;b.onclick=()=>selW(w);c.appendChild(b);});}
+function selW(w){cw=w;document.querySelectorAll('.wb').forEach(b=>b.classList.toggle('a',b.textContent===`Week ${w}`));rL();}
+function rL(){const k=`${ct}-${cw}`,l=L[k];if(!l){document.getElementById('lp').innerHTML='<p style="color:var(--text3);padding:40px;">Coming soon.</p>';return;}document.getElementById('lp').innerHTML=`<span class="lb t${l.tier}">Tier ${l.tier} \u00B7 Week ${cw}</span><h2 class="lt">${l.t}</h2><p class="ls">${l.s}</p>${l.c()}`;}
+async function init(){const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`});db=new SQL.Database();db.run(SCH);seed(db);rwb();selW(1);}
+document.getElementById('ed').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();run();}if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.substring(0,s)+'  '+t.value.substring(t.selectionEnd);t.selectionStart=t.selectionEnd=s+2;}});
+(function(){try{const t=localStorage.getItem('lec_theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+document.addEventListener('DOMContentLoaded',()=>{document.getElementById('mb').textContent=(document.documentElement.getAttribute('data-theme')||'light')==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';});
+// ── Drag handle for resizing SQL panel ──
+(function(){
+  const handle=document.getElementById('dragHandle'),panel=document.getElementById('sqlPanel');
+  let dragging=false,startY=0,startH=0;
+  handle.addEventListener('mousedown',e=>{dragging=true;startY=e.clientY;startH=panel.offsetHeight;handle.classList.add('active');document.body.style.cursor='ns-resize';document.body.style.userSelect='none';e.preventDefault();});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;const delta=e.clientY-startY;const newH=Math.max(80,Math.min(window.innerHeight*0.7,startH+delta));panel.style.height=newH+'px';});
+  document.addEventListener('mouseup',()=>{if(dragging){dragging=false;handle.classList.remove('active');document.body.style.cursor='';document.body.style.userSelect='';}});
+  // Touch support
+  handle.addEventListener('touchstart',e=>{dragging=true;startY=e.touches[0].clientY;startH=panel.offsetHeight;handle.classList.add('active');e.preventDefault();},{passive:false});
+  document.addEventListener('touchmove',e=>{if(!dragging)return;const delta=e.touches[0].clientY-startY;const newH=Math.max(80,Math.min(window.innerHeight*0.7,startH+delta));panel.style.height=newH+'px';},{passive:true});
+  document.addEventListener('touchend',()=>{if(dragging){dragging=false;handle.classList.remove('active');}});
+})();
+init();
+</script>
+</body>
+</html>
