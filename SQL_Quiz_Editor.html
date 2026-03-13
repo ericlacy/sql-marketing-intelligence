@@ -119,11 +119,7 @@ table.result-table tr:hover td{background:var(--hover)}
       <h1>Marketing Intelligence E-Commerce SQL Editor <span>v1.0</span></h1>
     </div>
   </div>
-  <div class="header-btns">
-    <button class="hbtn" onclick="document.getElementById('schemaModal').classList.add('show')">&#128196; Schema</button>
-    <button class="hbtn" onclick="document.getElementById('erModal').classList.add('show')">&#128279; ER Diagram</button>
-    <button class="hbtn" id="modeBtn" onclick="toggleMode()"></button>
-  </div>
+
 </div>
 
 <div class="main">
@@ -142,7 +138,7 @@ table.result-table tr:hover td{background:var(--hover)}
     </div>
     <div style="padding:6px 14px;background:rgba(253,187,48,.08);border-top:1px solid rgba(253,187,48,.25);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:6px">
       <span style="font-size:13px">&#128276;</span>
-      <span>SQL is not saved when you leave or refresh. To keep your work, copy it to <strong>Notepad</strong> (Windows), <strong>TextEdit</strong> (Mac), or any text editor before closing.</span>
+      <span>SQL is not saved. Copy your query directly into your quiz answer before running the next one.</span>
     </div>
     <div class="results-area" id="resultsArea">
       <div class="result-message info"><span class="icon">&#8594;</span> Run a query to see results.</div>
@@ -339,9 +335,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runQuery();}
     if(e.key==='Tab'){e.preventDefault();const s=e.target.selectionStart;e.target.value=e.target.value.substring(0,s)+'  '+e.target.value.substring(e.target.selectionEnd);e.target.selectionStart=e.target.selectionEnd=s+2;}
   });
-  const saved = localStorage.getItem('sqleditor_theme')||'light';
-  document.documentElement.setAttribute('data-theme',saved);
-  document.getElementById('modeBtn').textContent = saved==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
 });
 
 document.getElementById('schemaModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
