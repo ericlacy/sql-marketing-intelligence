@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root,[data-theme="light"]{--bg:#F4F7F5;--surface:#FFFFFF;--surface2:#EEF3F0;--surface3:#E3EBE6;--border:#C8D6CE;--text:#1A2E22;--text2:#4A6B55;--text3:#7A9A87;--usf-green:#00543C;--usf-green-dark:#003D2B;--usf-green-light:#007A57;--usf-gold:#D4960A;--usf-gold-bright:#FDBB30;--usf-gold-pale:rgba(212,150,10,.08);--tier1:#2E6EC7;--tier1bg:rgba(46,110,199,.08);--tier2:#B8860B;--tier2bg:rgba(184,134,11,.08);--tier3:#1A8A4A;--tier3bg:rgba(26,138,74,.08);--success:#1A8A4A;--successBg:rgba(26,138,74,.08);--error:#C0392B;--errorBg:rgba(192,57,43,.06);--partial:#B8860B;--partialBg:rgba(184,134,11,.08);--editor-bg:#F8FAF9;--editor-border:#C8D6CE;--editor-focus:#00543C;--th-bg:#00543C;--th-text:#fff;--hover:rgba(0,84,60,.04);--stripe:#F8FAF9;--shadow:0 1px 3px rgba(0,0,0,.06)}
+:root,[data-theme="light"]{--bg:#F4F7F5;--surface:#FFFFFF;--surface2:#EEF3F0;--surface3:#E3EBE6;--border:#C8D6CE;--text:#1A2E22;--text2:#4A6B55;--text3:#7A9A87;--usf-green:#00543C;--usf-green-dark:#003D2B;--usf-green-light:#007A57;--usf-gold:#D4960A;--usf-gold-bright:#FDBB30;--usf-gold-pale:rgba(212,150,10,.08);--tier1:#2E6EC7;--tier1bg:rgba(46,110,199,.08);--tier2:#B8860B;--tier2bg:rgba(184,134,11,.08);--tier3:#1A8A4A;--tier3bg:rgba(26,138,74,.08);--success:#1A8A4A;--successBg:rgba(26,138,74,.08);--error:#C0392B;--errorBg:rgba(192,57,43,.06);--partial:#B8860B;--partialBg:rgba(184,134,11,.08);--editor-bg:#F8FAF9;--editor-border:#C8D6CE;--editor-focus:#00543C;--th-bg:#00543C;--th-text:#fff;--hover:rgba(0,84,60,.04);--stripe:#F8FAF9;--shadow:0 1px 3px rgba(0,0,0,.06)--code-bg:#F0F4F1;--c-select:#2E6EC7;--c-from:#1A8A4A;--c-where:#B8860B;--c-group:#9B59B6;--c-having:#C0392B;--c-order:#2C3E50;--c-cte:#6C3483;--c-window:#2E86C1;--c-sub:#B8860B;--step-text:white}
 [data-theme="dark"]{--bg:#0C1A14;--surface:#0F2219;--surface2:#153024;--surface3:#1A3D2D;--border:#1E4A35;--text:#E8EDE9;--text2:#8FA99A;--text3:#5E7E6C;--usf-green:#00543C;--usf-green-dark:#003D2B;--usf-green-light:#007A57;--usf-gold:#FDBB30;--usf-gold-bright:#FDBB30;--usf-gold-pale:rgba(253,187,48,.12);--tier1:#5B9EEF;--tier1bg:rgba(91,158,239,.1);--tier2:#FDBB30;--tier2bg:rgba(253,187,48,.12);--tier3:#3EBF7B;--tier3bg:rgba(62,191,123,.1);--success:#3EBF7B;--successBg:rgba(62,191,123,.1);--error:#EF5B5B;--errorBg:rgba(239,91,91,.08);--partial:#FDBB30;--partialBg:rgba(253,187,48,.12);--editor-bg:#0A1610;--editor-border:#1E4A35;--editor-focus:#FDBB30;--th-bg:#003D2B;--th-text:#FDBB30;--hover:rgba(0,84,60,.15);--stripe:rgba(255,255,255,.02);--shadow:0 1px 3px rgba(0,0,0,.2)}
 *{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;transition:background .3s,color .3s}
 .app{display:flex;height:100vh;overflow:hidden}
@@ -94,12 +94,48 @@ table.result-table tr:nth-child(even) td{background:var(--stripe)}table.result-t
 .stats-bar button{margin-left:auto;background:none;border:none;color:var(--text3);font-family:inherit;font-size:10px;cursor:pointer}
 .stats-bar button:hover{color:var(--error)}.scorm-score{font-size:11px;font-weight:700;color:var(--usf-green);font-family:'JetBrains Mono',monospace;background:var(--usf-gold-pale);border:1px solid var(--usf-gold-bright);border-radius:6px;padding:2px 8px}[data-theme="dark"] .scorm-score{color:var(--usf-gold)}.scorm-lms{color:var(--success);font-size:10px}
 .sql-warn{padding:8px 14px;border-radius:8px;font-size:11.5px;line-height:1.5;margin-bottom:8px;background:rgba(253,187,48,.1);border-left:3px solid var(--gold);color:var(--text);display:flex;align-items:flex-start;gap:8px}.sql-warn .warn-icon{font-size:14px;flex-shrink:0;margin-top:1px}.sql-warn strong{color:var(--gold)}
+
+.cheat-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;backdrop-filter:blur(2px)}
+.cheat-overlay.open{display:block}
+.cheat-panel{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:95vw;background:var(--surface);border-left:1px solid var(--border);z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.cheat-panel.open{transform:translateX(0)}
+.cheat-hdr{padding:10px 16px;background:var(--usf-green);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cheat-hdr h2{font-size:13px;font-weight:700;color:#fff;flex:1}
+.cheat-hdr span{font-size:9px;color:var(--usf-gold-bright);background:rgba(253,187,48,.15);padding:2px 8px;border-radius:10px;font-weight:700}
+.cheat-close{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;width:26px;height:26px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cheat-close:hover{background:rgba(255,255,255,.15)}
+.cheat-search{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cheat-search input{width:100%;padding:6px 10px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;outline:none}
+.cheat-search input:focus{border-color:var(--usf-green)}
+.cheat-body{flex:1;overflow-y:auto;padding:10px 12px}
+.cheat-body::-webkit-scrollbar{width:4px}.cheat-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.cheat-week{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--usf-green);padding:8px 4px 4px;border-bottom:2px solid var(--usf-green);margin-bottom:6px;margin-top:10px}
+.cheat-week:first-child{margin-top:0}
+.cheat-entry{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.cheat-entry-hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;background:var(--surface2)}
+.cheat-entry-hdr:hover{background:var(--code-bg)}
+.cheat-entry-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;color:#fff;flex-shrink:0}
+.cheat-entry-tag.cs{background:var(--c-select)}.cheat-entry-tag.cf{background:var(--c-from)}.cheat-entry-tag.cw{background:var(--c-where);color:#1A2E22}.cheat-entry-tag.cg{background:var(--c-group)}.cheat-entry-tag.ch{background:var(--c-having)}.cheat-entry-tag.co{background:var(--c-order)}.cheat-entry-tag.ct{background:var(--c-cte)}.cheat-entry-tag.cwn{background:var(--c-window)}.cheat-entry-tag.csb{background:var(--c-sub);color:#1A2E22}.cheat-entry-tag.fmt{background:#7D4E9E}
+.cheat-entry-name{font-size:11px;font-weight:600;color:var(--text);flex:1}
+.cheat-entry-body{display:none;padding:8px 12px}
+.cheat-entry.open .cheat-entry-body{display:block}
+.cheat-entry-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--usf-green);background:var(--code-bg);padding:8px 10px;border-radius:6px;white-space:pre-wrap;margin-bottom:6px;line-height:1.6;cursor:pointer}
+[data-theme="dark"] .cheat-entry-code{color:var(--usf-gold-bright)}
+.cheat-entry-code:hover{border:1px solid var(--usf-green)}
+.cheat-clauses{margin-top:4px}
+.cheat-cl{display:flex;gap:6px;font-size:10px;line-height:1.5;padding:2px 0;border-bottom:1px solid var(--border)}
+.cheat-cl:last-child{border-bottom:none}
+.cheat-cl-kw{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--usf-green);flex-shrink:0;min-width:80px}
+[data-theme="dark"] .cheat-cl-kw{color:var(--usf-gold-bright)}
+.cheat-cl-desc{color:var(--text2);flex:1}
+.cheat-opt-badge{display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;color:var(--usf-gold-bright);background:rgba(253,187,48,.12);padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+.cheat-hidden{display:none}
 </style>
 </head>
 <body>
 <div class="app">
 <aside class="sidebar">
-<div class="sidebar-header"><h1>SQL Marketing Intelligence Lab <span style="font-size:10px;font-weight:400;opacity:.7;letter-spacing:.04em">v1.4</span></h1><div style="display:flex;gap:6px;align-items:center"><button class="mode-toggle" onclick="loadScratchpad()" title="SQL Scratchpad" style="font-size:11px;padding:4px 10px">&#9998; SQL</button><button class="mode-toggle" onclick="toggleMode()" id="modeBtn"></button></div></div>
+<div class="sidebar-header"><h1>SQL Marketing Intelligence Lab <span style="font-size:10px;font-weight:400;opacity:.7;letter-spacing:.04em">v1.4</span></h1><div style="display:flex;gap:6px;align-items:center"><button class="mode-toggle" onclick="togCheat()" style="font-size:11px;padding:4px 10px;background:rgba(253,187,48,.2);border-color:rgba(253,187,48,.5)" title="SQL Cheat Sheet">&#128196; Cheat</button><button class="mode-toggle" onclick="loadScratchpad()" title="SQL Scratchpad" style="font-size:11px;padding:4px 10px">&#9998; SQL</button><button class="mode-toggle" onclick="toggleMode()" id="modeBtn"></button></div></div>
 <div class="tier-tabs" id="tierTabs"></div>
 <div class="exercise-list" id="exerciseList"></div>
 <div class="stats-bar" id="statsBar"></div>
@@ -118,17 +154,7 @@ function toggleMode(){const t=document.documentElement.getAttribute('data-theme'
 document.addEventListener('DOMContentLoaded',()=>{document.getElementById('modeBtn').textContent=(document.documentElement.getAttribute('data-theme')||'light')==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';});
 
 const SEED_SQL=`CREATE TABLE customers(customer_id INTEGER PRIMARY KEY,name TEXT NOT NULL,email TEXT,segment TEXT,signup_date TEXT,region TEXT,lifetime_value REAL);CREATE TABLE products(product_id INTEGER PRIMARY KEY,product_name TEXT NOT NULL,category TEXT,price REAL,margin_pct REAL);CREATE TABLE orders(order_id INTEGER PRIMARY KEY,customer_id INTEGER,order_date TEXT,total_amount REAL,discount_applied REAL,channel TEXT,status TEXT);CREATE TABLE order_items(id INTEGER PRIMARY KEY,order_id INTEGER,product_id INTEGER,quantity INTEGER,unit_price REAL);CREATE TABLE campaigns(campaign_id INTEGER PRIMARY KEY,campaign_name TEXT NOT NULL,channel TEXT,start_date TEXT,end_date TEXT,budget REAL,target_segment TEXT);CREATE TABLE campaign_touches(touch_id INTEGER PRIMARY KEY,campaign_id INTEGER,customer_id INTEGER,touch_date TEXT,response TEXT);`;
-function seedData(db){const segments=['B2B','B2C','Enterprise'],regions=['West','East','Central','South'],channels=['web','app','store'],statuses=['completed','completed','completed','completed','pending','returned','cancelled'],responses=['click','open','convert','ignore','ignore','ignore','ignore','open','click'],categories=['Electronics','Apparel','Home & Garden','Sports','Beauty','Food & Beverage'];const fn=['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','William','Elizabeth','David','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Charles','Karen','Emma','Olivia','Ava','Sophia','Mia','Liam','Noah','Ethan','Lucas','Mason','Daniel','Nancy','Matthew','Lisa','Anthony','Betty','Mark','Dorothy','Donald','Sandra','Andrew','Ashley','Steven','Kimberly','Paul','Emily','Joshua','Donna','Kenneth','Michelle','Kevin','Carol','Brian','Amanda','George','Melissa','Timothy','Deborah','Ronald','Stephanie','Edward','Rebecca','Jason','Sharon','Jeffrey','Laura','Ryan','Cynthia','Jacob','Kathleen','Gary','Amy','Nicholas','Angela','Eric','Shirley','Jonathan','Anna','Stephen','Brenda','Larry','Pamela','Justin','Katherine','Scott','Nicole','Brandon','Samantha','Benjamin','Christine','Samuel','Catherine','Gregory','Virginia','Alexander','Debra','Frank','Rachel','Patrick','Carolyn'];const ln=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Anderson','Taylor','Thomas','Moore','Jackson','Lee','Harris','Clark','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes'];const pn={Electronics:['Wireless Headphones','USB-C Hub','Portable Charger','Smart Speaker','Webcam Pro','Mechanical Keyboard','Monitor Stand','Cable Kit','Bluetooth Tracker','LED Desk Lamp'],Apparel:['Classic Tee','Denim Jacket','Running Shoes','Wool Scarf','Baseball Cap','Polo Shirt','Chino Pants','Rain Jacket','Sneakers','Cardigan'],'Home & Garden':['Plant Pot Set','LED String Lights','Throw Blanket','Wall Shelf','Candle Set','Door Mat','Picture Frame','Herb Garden Kit','Storage Basket','Cushion Cover'],Sports:['Yoga Mat','Resistance Bands','Water Bottle','Jump Rope','Foam Roller','Gym Bag','Wrist Wraps','Cycling Gloves','Sports Towel','Ankle Weights'],Beauty:['Face Serum','Lip Balm Set','Sunscreen SPF50','Hair Oil','Body Lotion','Eye Cream','Sheet Masks','Nail Polish Set','Dry Shampoo','Moisturizer'],'Food & Beverage':['Organic Coffee','Matcha Powder','Protein Bars','Olive Oil','Hot Sauce Set','Trail Mix','Herbal Tea','Granola','Honey Jar','Spice Kit']};// Seeded PRNG (Mulberry32, seed 698) — identical DB every session
-function mulberry32(s){
-  return function(){
-    s|=0;s=s+0x6D2B79F5|0;
-    var t=Math.imul(s^s>>>15,1|s);
-    t=t+Math.imul(t^t>>>7,61|t)^t;
-    return((t^t>>>14)>>>0)/4294967296;
-  };
-}
-var _rng=mulberry32(698);
-const r=(a,b)=>Math.floor(_rng()*(b-a+1))+a,p=a=>a[r(0,a.length-1)],dt=(y,m1,m2)=>{const m=r(m1,m2),d=r(1,28);return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;};let pid=1;categories.forEach(c=>{pn[c].forEach(n=>{db.run("INSERT INTO products VALUES(?,?,?,?,?)",[pid++,n,c,(r(8,250)+r(0,99)/100).toFixed(2),(r(10,65)).toFixed(1)]);});});const ci=[];for(let i=1;i<=5000;i++){const nm=fn[(i-1)%fn.length]+' '+ln[Math.floor((i-1)/fn.length)%ln.length],em=nm.toLowerCase().replace(/ /g,'.')+i+'@example.com',sg=p(segments),yr=p([2021,2022,2023,2024]),sd=dt(yr,1,12),rg=p(regions),lv=(r(50,15000)+r(0,99)/100).toFixed(2);db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[i,nm,em,sg,sd,rg,lv]);ci.push(i);if(i%250===0)db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[5000+Math.floor(i/250),nm,em.replace('@','+dup@'),sg,sd,rg,lv]);}const cn=['Spring Push','Summer Blitz','Fall Promo','Holiday Sale','New Year Launch','B2B Outreach','Enterprise Connect','App Install Drive','Loyalty Boost','Win-Back','Flash Sale Q1','Flash Sale Q2','Flash Sale Q3','Flash Sale Q4','Brand Awareness','Referral Program','Social Media Surge','Email Re-engage','Content Series','Webinar Funnel','Product Launch A','Product Launch B','Clearance Event','VIP Preview','Regional Push'],cc=['email','social','paid_search','display','direct_mail'];for(let i=1;i<=25;i++){const ch=p(cc),sg=p(segments),yr=p([2023,2024]),sm=r(1,10),sd=dt(yr,sm,sm);let em=r(sm+1,12),ey=yr;if(em>12){em-=12;ey=yr+1;}const ed=`${ey}-${String(em).padStart(2,'0')}-${String(r(1,28)).padStart(2,'0')}`;if(i===13)db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,ed,sd,r(5000,80000),sg]);else db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,sd,ed,r(5000,80000),sg]);}for(let i=1;i<=20000;i++){const cid=p(ci),yr=p([2023,2024]),od=dt(yr,1,12),amt=(r(15,1200)+r(0,99)/100).toFixed(2),disc=_rng()<0.3?null:(r(0,30)/100*amt).toFixed(2);db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,cid,od,amt,disc,p(channels),p(statuses)]);}for(let i=20001;i<=20050;i++)db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,r(9001,9050),dt(p([2023,2024]),1,12),(r(15,1200)+r(0,99)/100).toFixed(2),null,p(channels),p(statuses)]);let oiId=1;for(let o=1;o<=20050;o++){const n=r(1,4);for(let j=0;j<n;j++)db.run("INSERT INTO order_items VALUES(?,?,?,?,?)",[oiId++,o,r(1,60),r(1,5),(r(8,250)+r(0,99)/100).toFixed(2)]);}for(let i=1;i<=50000;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),p(ci),dt(p([2023,2024]),1,12),p(responses)]);for(let i=50001;i<=50100;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),r(9001,9050),dt(p([2023,2024]),1,12),p(responses)]);}
+function seedData(db){const segments=['B2B','B2C','Enterprise'],regions=['West','East','Central','South'],channels=['web','app','store'],statuses=['completed','completed','completed','completed','pending','returned','cancelled'],responses=['click','open','convert','ignore','ignore','ignore','ignore','open','click'],categories=['Electronics','Apparel','Home & Garden','Sports','Beauty','Food & Beverage'];const fn=['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','William','Elizabeth','David','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Charles','Karen','Emma','Olivia','Ava','Sophia','Mia','Liam','Noah','Ethan','Lucas','Mason','Daniel','Nancy','Matthew','Lisa','Anthony','Betty','Mark','Dorothy','Donald','Sandra','Andrew','Ashley','Steven','Kimberly','Paul','Emily','Joshua','Donna','Kenneth','Michelle','Kevin','Carol','Brian','Amanda','George','Melissa','Timothy','Deborah','Ronald','Stephanie','Edward','Rebecca','Jason','Sharon','Jeffrey','Laura','Ryan','Cynthia','Jacob','Kathleen','Gary','Amy','Nicholas','Angela','Eric','Shirley','Jonathan','Anna','Stephen','Brenda','Larry','Pamela','Justin','Katherine','Scott','Nicole','Brandon','Samantha','Benjamin','Christine','Samuel','Catherine','Gregory','Virginia','Alexander','Debra','Frank','Rachel','Patrick','Carolyn'];const ln=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Anderson','Taylor','Thomas','Moore','Jackson','Lee','Harris','Clark','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes'];const pn={Electronics:['Wireless Headphones','USB-C Hub','Portable Charger','Smart Speaker','Webcam Pro','Mechanical Keyboard','Monitor Stand','Cable Kit','Bluetooth Tracker','LED Desk Lamp'],Apparel:['Classic Tee','Denim Jacket','Running Shoes','Wool Scarf','Baseball Cap','Polo Shirt','Chino Pants','Rain Jacket','Sneakers','Cardigan'],'Home & Garden':['Plant Pot Set','LED String Lights','Throw Blanket','Wall Shelf','Candle Set','Door Mat','Picture Frame','Herb Garden Kit','Storage Basket','Cushion Cover'],Sports:['Yoga Mat','Resistance Bands','Water Bottle','Jump Rope','Foam Roller','Gym Bag','Wrist Wraps','Cycling Gloves','Sports Towel','Ankle Weights'],Beauty:['Face Serum','Lip Balm Set','Sunscreen SPF50','Hair Oil','Body Lotion','Eye Cream','Sheet Masks','Nail Polish Set','Dry Shampoo','Moisturizer'],'Food & Beverage':['Organic Coffee','Matcha Powder','Protein Bars','Olive Oil','Hot Sauce Set','Trail Mix','Herbal Tea','Granola','Honey Jar','Spice Kit']};const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,p=a=>a[r(0,a.length-1)],dt=(y,m1,m2)=>{const m=r(m1,m2),d=r(1,28);return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;};let pid=1;categories.forEach(c=>{pn[c].forEach(n=>{db.run("INSERT INTO products VALUES(?,?,?,?,?)",[pid++,n,c,(r(8,250)+r(0,99)/100).toFixed(2),(r(10,65)).toFixed(1)]);});});const ci=[];for(let i=1;i<=5000;i++){const nm=fn[(i-1)%fn.length]+' '+ln[Math.floor((i-1)/fn.length)%ln.length],em=nm.toLowerCase().replace(/ /g,'.')+i+'@example.com',sg=p(segments),yr=p([2021,2022,2023,2024]),sd=dt(yr,1,12),rg=p(regions),lv=(r(50,15000)+r(0,99)/100).toFixed(2);db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[i,nm,em,sg,sd,rg,lv]);ci.push(i);if(i%250===0)db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[5000+Math.floor(i/250),nm,em.replace('@','+dup@'),sg,sd,rg,lv]);}const cn=['Spring Push','Summer Blitz','Fall Promo','Holiday Sale','New Year Launch','B2B Outreach','Enterprise Connect','App Install Drive','Loyalty Boost','Win-Back','Flash Sale Q1','Flash Sale Q2','Flash Sale Q3','Flash Sale Q4','Brand Awareness','Referral Program','Social Media Surge','Email Re-engage','Content Series','Webinar Funnel','Product Launch A','Product Launch B','Clearance Event','VIP Preview','Regional Push'],cc=['email','social','paid_search','display','direct_mail'];for(let i=1;i<=25;i++){const ch=p(cc),sg=p(segments),yr=p([2023,2024]),sm=r(1,10),sd=dt(yr,sm,sm);let em=r(sm+1,12),ey=yr;if(em>12){em-=12;ey=yr+1;}const ed=`${ey}-${String(em).padStart(2,'0')}-${String(r(1,28)).padStart(2,'0')}`;if(i===13)db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,ed,sd,r(5000,80000),sg]);else db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,sd,ed,r(5000,80000),sg]);}for(let i=1;i<=20000;i++){const cid=p(ci),yr=p([2023,2024]),od=dt(yr,1,12),amt=(r(15,1200)+r(0,99)/100).toFixed(2),disc=Math.random()<0.3?null:(r(0,30)/100*amt).toFixed(2);db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,cid,od,amt,disc,p(channels),p(statuses)]);}for(let i=20001;i<=20050;i++)db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,r(9001,9050),dt(p([2023,2024]),1,12),(r(15,1200)+r(0,99)/100).toFixed(2),null,p(channels),p(statuses)]);let oiId=1;for(let o=1;o<=20050;o++){const n=r(1,4);for(let j=0;j<n;j++)db.run("INSERT INTO order_items VALUES(?,?,?,?,?)",[oiId++,o,r(1,60),r(1,5),(r(8,250)+r(0,99)/100).toFixed(2)]);}for(let i=1;i<=50000;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),p(ci),dt(p([2023,2024]),1,12),p(responses)]);for(let i=50001;i<=50100;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),r(9001,9050),dt(p([2023,2024]),1,12),p(responses)]);}
 
 const exercises=[
 {id:'t1w1e1',tier:1,week:1,title:'Enterprise Customers by LTV',context:'VP Sales: "Who are our top Enterprise clients?"',biz:'Show me all Enterprise customers from 2024, ranked by value.',desc:'WHERE segment + signup_date, ORDER BY lifetime_value DESC',hint:'<strong>Concepts:</strong> SELECT, WHERE, ORDER BY',starter:'SELECT ',grade(rows,cols){const c=[];const hasId=cols.some(x=>['name','customer_id'].includes(x.toLowerCase()));c.push({pass:hasId,msg:hasId?'Customer identifier present (name or customer_id).':'Missing name or customer_id — include a customer identifier.'});const hasLTV=cols.some(x=>x.toLowerCase().includes('lifetime_value')||x.toLowerCase().includes('ltv'));c.push({pass:hasLTV,msg:hasLTV?'lifetime_value present.':'Missing lifetime_value — required to rank by value.'});const si=cols.indexOf('segment');const ae=si>=0&&rows.length>0&&rows.every(r=>r[si]==='Enterprise');c.push({pass:ae,msg:ae?'All rows are Enterprise segment.':"Non-Enterprise rows found — check WHERE segment = 'Enterprise'."});const di=cols.findIndex(x=>x.toLowerCase().includes('signup_date')||x.toLowerCase().includes('date'));c.push({pass:di>=0&&rows.every(r=>r[di]&&String(r[di]).startsWith('2024')),msg:'2024 signup_date filter applied.'});const li=cols.findIndex(x=>x.toLowerCase().includes('lifetime_value')||x.toLowerCase().includes('ltv'));let s=true;if(li>=0&&rows.length>1)for(let i=1;i<rows.length;i++)if(Number(rows[i][li])>Number(rows[i-1][li])){s=false;break;}c.push({pass:s,msg:s?'Sorted by lifetime_value DESC.':'Add ORDER BY lifetime_value DESC.'});c.push({pass:rows.length>0,msg:`${rows.length} rows returned.`});return c;}},
@@ -200,5 +226,737 @@ document.getElementById('erModal').addEventListener('click',function(e){if(e.tar
 init();
 </script>
 
+
+<div class="cheat-overlay" id="cheatOverlay" onclick="togCheat()"></div>
+<div class="cheat-panel" id="cheatPanel">
+<div class="cheat-hdr"><h2>SQL Cheat Sheet</h2><span>28 entries</span><button class="cheat-close" onclick="togCheat()">&#10005;</button></div>
+<div class="cheat-search"><input type="text" id="cheatSearch" placeholder="Search statements&#8230;" oninput="filterCheat(this.value)"></div>
+<div class="cheat-body" id="cheatBody"></div>
+</div>
+<script>
+function syn(code, clauses){
+  const cls = clauses.map(c=>`<div class="syn-clause"><span class="syn-kw">${c[0]}</span><span class="syn-desc">${c[1]}</span></div>`).join('');
+  return `<div class="syn-block"><div class="syn-title">Syntax</div><div class="syn-code">${code}</div><div>${cls}</div></div>`;
+}
+function opt(title, codeLines, desc){
+  const codeHTML = codeLines.map(l=>`<div class="syn-code" style="margin-bottom:4px">${l}</div>`).join('');
+  return `<div class="syn-opt"><span class="syn-opt-label">Optional Enhancement</span><strong>${title}</strong><div class="syn-opt-body">${desc}${codeHTML}</div></div>`;
+}
+function togCheat(){
+  const p=document.getElementById('cheatPanel'),o=document.getElementById('cheatOverlay');
+  const open=p.classList.toggle('open');
+  o.classList.toggle('open',open);
+  if(open&&!document.getElementById('cheatBody').children.length) buildCheat();
+}
+function filterCheat(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.cheat-entry').forEach(e=>{
+    const txt=(e.querySelector('.cheat-entry-name').textContent+e.querySelector('.cheat-entry-code').textContent).toLowerCase();
+    e.classList.toggle('cheat-hidden',q&&!txt.includes(q));
+  });
+  document.querySelectorAll('.cheat-week').forEach(w=>{
+    const entries=w.nextElementSibling?[...document.querySelectorAll('.cheat-entry')].filter(e=>e.previousElementSibling===w||e===w.nextElementSibling):[];
+  });
+}
+function togCheatEntry(el){el.closest('.cheat-entry').classList.toggle('open');}
+function runCheatSQL(el){
+  const code=el.textContent.trim();
+  document.getElementById('sqlPanel').classList.remove('collapsed');
+  document.getElementById('ed').value=code;
+  document.getElementById('ed').focus();
+  run();
+  togCheat();
+}
+
+// ── Cheat Sheet Data ──────────────────────────────────────────────
+const CHEAT=[
+{week:'Week 1 — Foundations',entries:[
+{tag:'cs',name:'SELECT … FROM … LIMIT',
+ code:`SELECT [* | column [, column ...]]
+FROM   table_name
+[LIMIT  n]`,
+ clauses:[
+  ['SELECT','Columns to return. * returns all columns.',],
+  ['FROM','The source table.',],
+  ['LIMIT','Optional. Caps the number of rows returned. Useful for exploring schema.',]
+]},
+{tag:'cf',name:'INNER JOIN … ON',
+ code:`SELECT t1.col, t2.col
+FROM   table1 t1
+INNER JOIN table2 t2
+  ON t1.foreign_key = t2.primary_key`,
+ clauses:[
+  ['INNER JOIN','Returns only rows where the ON condition matches in BOTH tables. Non-matching rows (orphans) are silently dropped.',],
+  ['ON','The join condition. Always matches a FK in one table to a PK in the other. Read this from the ER diagram.',],
+  ['Alias','Short name (t1, t2) placed after table name. Required when joining a table to itself; good practice always.',]
+]},
+{tag:'cf',name:'LEFT JOIN … ON … WHERE … IS NULL',
+ code:`SELECT t1.col, t2.col
+FROM   table1 t1
+LEFT JOIN table2 t2
+  ON t1.foreign_key = t2.primary_key
+[WHERE t2.primary_key IS NULL]`,
+ clauses:[
+  ['LEFT JOIN','Returns ALL rows from the left table. Fills NULLs where no match exists in the right table.',],
+  ['ON','Same join condition as INNER JOIN.',],
+  ['WHERE … IS NULL','Added after LEFT JOIN to isolate unmatched rows only (orphan detection pattern).',]
+]},
+{tag:'cw',name:'WHERE (conditions + LIKE)',
+ code:`WHERE condition [AND | OR condition ...]
+-- Text match
+WHERE col LIKE 'prefix%'
+WHERE col LIKE '%substring%'
+WHERE col LIKE 'A_C'`,
+ clauses:[
+  ['WHERE','Filters rows BEFORE grouping. NULLs evaluate as UNKNOWN (not TRUE or FALSE) so NULL comparisons must use IS NULL / IS NOT NULL.',],
+  ['AND / OR','AND requires both conditions true. OR requires either.',],
+  ['LIKE','Case-insensitive text pattern match. Use with % (any sequence) or _ (single character).',],
+  ['%','Wildcard: matches zero or more characters. % at start and end = contains.',],
+  ['_','Wildcard: matches exactly one character.',]
+]},
+{tag:'cs',name:'UPPER() / LOWER() — case-safe comparison',
+ code:`WHERE UPPER(city) = 'SAN FRANCISCO'
+WHERE LOWER(email) LIKE '%@gmail%'`,
+ clauses:[
+  ['UPPER(col)','Converts col to uppercase. Use to normalise mixed-case data before comparison.',],
+  ['LOWER(col)','Converts col to lowercase.',],
+  ['Optional','These are formatting/normalisation helpers. Not required when data is already consistently cased.',]
+],opt:true},
+{tag:'co',name:'ORDER BY',
+ code:`ORDER BY column [ASC | DESC]
+       [, column [ASC | DESC] ...]`,
+ clauses:[
+  ['ORDER BY','Sorts the result set. Applied after WHERE, GROUP BY, and HAVING.',],
+  ['ASC','Ascending order (lowest first). Default if omitted.',],
+  ['DESC','Descending order (highest first).',],
+  ['Multiple cols','Secondary sort applied when the first column has ties: ORDER BY tier, total_points DESC',]
+]},
+{tag:'cw',name:'NULL behavior',
+ code:`-- IS NULL detects missing values
+WHERE col IS NULL
+WHERE col IS NOT NULL
+-- COALESCE replaces NULL with a default
+COALESCE(col, 0)
+COALESCE(col, 'Unknown')`,
+ clauses:[
+  ['IS NULL','The only correct way to test for NULL. NULL = NULL evaluates as UNKNOWN, not TRUE.',],
+  ['IS NOT NULL','Returns rows where the column has a value.',],
+  ['COALESCE','Returns the first non-NULL argument. Use to substitute a default value.',]
+]}
+]},
+{week:'Week 2 — Connecting Tables',entries:[
+{tag:'cf',name:'Multi-table JOIN chain',
+ code:`SELECT a.col, b.col, c.col
+FROM   table_a a
+JOIN   table_b b ON a.id = b.a_id
+JOIN   table_c c ON b.id = c.b_id`,
+ clauses:[
+  ['Chain JOINs','Each JOIN adds one more table. Follow the ER diagram path left to right.',],
+  ['Alias','Prefix each column with its table alias to avoid ambiguous column name errors.',],
+  ['Order','Start FROM the table closest to your answer. Join outward following FK arrows.',]
+]},
+{tag:'cf',name:'LEFT JOIN orphan detection',
+ code:`SELECT t.txn_id, t.member_id
+FROM   transactions t
+LEFT JOIN members m
+  ON t.member_id = m.member_id
+WHERE  m.member_id IS NULL`,
+ clauses:[
+  ['Pattern','Flip the table on the left to change which side keeps all rows.',],
+  ['WHERE IS NULL','Isolates the non-matching (orphan) rows after the LEFT JOIN.',],
+  ['Business meaning','~40 transactions exist for deleted or invalid accounts. INNER JOIN hides all of them.',]
+]}
+]},
+{week:'Week 3 — Aggregation & KPIs',entries:[
+{tag:'cg',name:'GROUP BY + aggregate functions',
+ code:`SELECT  col, COUNT(*), COUNT(DISTINCT col2),
+        AVG(col3), SUM(col4), MIN(col5), MAX(col6)
+FROM    table
+[WHERE  condition]
+GROUP BY col`,
+ clauses:[
+  ['GROUP BY','Collapses all rows with the same value into one summary row.',],
+  ['COUNT(*)','Counts every row in the group, including NULLs.',],
+  ['COUNT(DISTINCT col)','Counts unique non-NULL values. Use to avoid fan-out inflation from JOINs.',],
+  ['AVG(col)','Mean of non-NULL values. NULLs are excluded from both numerator and denominator.',],
+  ['SUM(col)','Total of non-NULL values.',],
+  ['MIN / MAX','Smallest / largest non-NULL value.',]
+]},
+{tag:'cs',name:'ROUND() + printf() formatting',
+ code:`ROUND(value, decimal_places)
+-- Optional display formatting (SQLite)
+printf('$%.2f', value)    -- $12.50
+printf('%.1f%%', value)   -- 43.2%`,
+ clauses:[
+  ['ROUND(v, n)','Rounds v to n decimal places. n=2 for currency, n=4 for rates.',],
+  ['printf(fmt, v)','SQLite string formatting. Use for display only — do not sort or filter on printf output.',],
+  ['$%.2f','$ literal + %.2f = two decimal float.',],
+  ['%.1f%%','One decimal float + % sign (escaped as %% in printf).',]
+],opt:true},
+{tag:'cs',name:'CASE WHEN … THEN … ELSE … END',
+ code:`CASE WHEN condition THEN value
+     [WHEN condition THEN value ...]
+     [ELSE default_value]
+END`,
+ clauses:[
+  ['CASE WHEN','Evaluates conditions in order. Returns the value for the FIRST matching WHEN.',],
+  ['ELSE','Optional fallback. Without ELSE, unmatched rows return NULL.',],
+  ['Inside COUNT','COUNT(CASE WHEN x THEN 1 END) counts rows where condition is true.',],
+  ['Inside SUM','SUM(CASE WHEN x THEN value ELSE 0 END) — ELSE 0 prevents NULL from propagating.',]
+]},
+{tag:'cs',name:'Integer division fix',
+ code:`-- Wrong: integer / integer = integer
+SELECT 3 / 4;           -- returns 0
+-- Fix option 1: multiply by 1.0
+SELECT 1.0 * 3 / 4;    -- returns 0.75
+-- Fix option 2: CAST (explicit, preferred)
+SELECT CAST(3 AS REAL) / 4;`,
+ clauses:[
+  ['Integer division','SQLite divides integers and truncates the decimal. Always produces 0 for values < 1.',],
+  ['1.0 *','Cheapest fix. Forces float arithmetic by making the first operand a float.',],
+  ['CAST(v AS REAL)','More explicit and readable. Preferred in production code.',],
+  ['CAST(v AS TEXT)','Converts a number to its string representation.',]
+],opt:true},
+{tag:'ch',name:'HAVING',
+ code:`SELECT col, aggregate_fn(col2)
+FROM   table
+GROUP BY col
+HAVING aggregate_fn(col2) > threshold`,
+ clauses:[
+  ['HAVING','Filters AFTER grouping. Operates on aggregate results, not on individual rows.',],
+  ['vs WHERE','WHERE filters rows before grouping. HAVING filters groups after aggregation. They are not interchangeable.',],
+  ['Rule','Any condition using an aggregate function (COUNT, SUM, AVG…) must go in HAVING, never WHERE.',]
+]}
+]},
+{week:'Week 4 — Subqueries & Comparisons',entries:[
+{tag:'csb',name:'Derived table (subquery in FROM)',
+ code:`SELECT outer.col, sub.col
+FROM   outer_table outer
+JOIN (
+  SELECT key_col, aggregate_fn(col) AS alias
+  FROM   inner_table
+  GROUP BY key_col
+) sub ON outer.key_col = sub.key_col`,
+ clauses:[
+  ['Subquery in FROM','Any SELECT can be wrapped in parentheses and used as a table source. Must be aliased.',],
+  ['Use case','Calculate per-group aggregates, then JOIN them back to individual rows for comparison.',],
+  ['Execution order','The inner query (sub) runs first. Outer query then reads its result as a table.',]
+]},
+{tag:'cs',name:'SUM(CASE WHEN) pivot + BETWEEN',
+ code:`SELECT  group_col,
+  SUM(CASE WHEN col BETWEEN start AND end THEN value ELSE 0 END) AS period_1,
+  SUM(CASE WHEN col BETWEEN start AND end THEN value ELSE 0 END) AS period_2
+FROM table
+GROUP BY group_col`,
+ clauses:[
+  ['Pivot pattern','Creates side-by-side period columns from a single date column. No JOIN needed.',],
+  ['BETWEEN x AND y','Inclusive range filter. Equivalent to col >= x AND col <= y.',],
+  ['ELSE 0','Critical: without ELSE 0, rows outside the condition contribute NULL, which propagates through SUM.',]
+]}
+]},
+{week:'Week 5 — Advanced Patterns',entries:[
+{tag:'cwn',name:'RANK() OVER (PARTITION BY … ORDER BY …)',
+ code:`RANK() OVER (
+  [PARTITION BY partition_col, ...]
+   ORDER BY sort_col [ASC | DESC]
+)`,
+ clauses:[
+  ['RANK()','Assigns a rank number within each partition. Tied values get the same rank; next rank skips (1,1,3…).',],
+  ['OVER','Required keyword that opens the window function clause.',],
+  ['PARTITION BY','Resets the rank counter for each unique value of partition_col. Omit for a global rank.',],
+  ['ORDER BY','Determines sort direction for ranking within each partition.',],
+  ['DENSE_RANK()','Alternative: no rank gaps after ties (1,1,2…). Use when gaps would be confusing.',]
+]},
+{tag:'cwn',name:'NTILE(n) OVER (PARTITION BY … ORDER BY …)',
+ code:`NTILE(number_of_buckets) OVER (
+  [PARTITION BY partition_col, ...]
+   ORDER BY sort_col [ASC | DESC]
+)`,
+ clauses:[
+  ['NTILE(n)','Divides rows into n equal-sized buckets. Returns bucket number 1 through n.',],
+  ['PARTITION BY','Optional. Resets buckets per group.',],
+  ['ORDER BY','Required. Determines which rows go into which bucket.',],
+  ['Filter on result','Cannot use WHERE on NTILE in the same SELECT. Must wrap in a subquery: SELECT * FROM (...) WHERE ntile_col = 1',]
+]},
+{tag:'csb',name:'Subquery wrapper for window filter',
+ code:`SELECT *
+FROM (
+  SELECT col,
+         NTILE(10) OVER (
+           PARTITION BY tier
+           ORDER BY total_points DESC
+         ) AS decile
+  FROM members
+) ranked
+WHERE decile = 1`,
+ clauses:[
+  ['Why wrap?','Window functions are computed in the SELECT phase. WHERE is evaluated before SELECT, so you cannot filter on a window result in the same query.',],
+  ['Pattern','Compute the window in an inner query. Filter in the outer query WHERE clause.',]
+]},
+{tag:'ct',name:'WITH … AS (CTE)',
+ code:`WITH cte_name AS (
+  SELECT col, aggregate_fn(col2) AS alias
+  FROM   table
+  [WHERE condition]
+  GROUP BY col
+)
+SELECT cte_name.col, cte_name.alias
+FROM   cte_name
+[ORDER BY col]`,
+ clauses:[
+  ['WITH','Opens the CTE definition. Can define multiple CTEs separated by commas: WITH a AS (...), b AS (...)',],
+  ['AS (…)','The subquery that defines the CTE. Executes before the main SELECT.',],
+  ['Purpose','Breaks complex queries into named, readable steps. Especially useful for time-series: build monthly totals first, then add LAG.',],
+  ['Scope','The CTE name is available only within the same query. It is not stored permanently.',]
+]},
+{tag:'cwn',name:'LAG() OVER (ORDER BY …)',
+ code:`LAG(col [, offset [, default]]) OVER (
+  [PARTITION BY partition_col]
+   ORDER BY sort_col
+)`,
+ clauses:[
+  ['LAG(col)','Returns the value of col from the previous row in the window order.',],
+  ['offset','Optional. Number of rows back to look. Default is 1.',],
+  ['default','Optional. Value returned when there is no previous row (first row). Default is NULL.',],
+  ['NULL on first row','The first row has no prior row. LAG() returns NULL — this is correct. Do NOT COALESCE to 0 (causes division by zero in growth calculations).',],
+  ['LEAD(col)','The forward-looking equivalent: returns the value from the next row.',]
+]},
+{tag:'cs',name:'strftime() — date formatting',
+ code:`strftime('%Y-%m', date_col)      -- '2024-03'
+strftime('%Y', date_col)         -- '2024'
+strftime('%m', date_col)         -- '03'
+-- Optional: human-readable month
+strftime('%B %Y', date_col)      -- 'March 2024'`,
+ clauses:[
+  ['strftime(fmt, col)','SQLite date formatting function. Returns a string.',],
+  ['%Y-%m','ISO year-month. Best for GROUP BY — sorts correctly as a string.',],
+  ['%B','Full month name. Use for display only — does not sort chronologically.',],
+  ['GROUP BY','Always GROUP BY the same strftime() expression used in SELECT, not the display version.',]
+],opt:true}
+]},
+{week:'Week 6 — Data Quality Audit',entries:[
+{tag:'cs',name:'COALESCE()',
+ code:`COALESCE(value1, value2 [, ...])
+-- Replace NULL with 0
+AVG(COALESCE(tip_amount, 0))
+-- Replace NULL with label
+COALESCE(city, 'Unknown')`,
+ clauses:[
+  ['COALESCE','Returns the first non-NULL argument in the list.',],
+  ['AVG(COALESCE(x, 0))','Treats NULLs as zero. Increases the denominator vs AVG(x) which excludes NULLs. Document which you choose.',],
+  ['NULL impact','AVG(x) and AVG(COALESCE(x, 0)) often return different values. The difference reveals how many NULLs exist.',]
+]},
+{tag:'ch',name:'HAVING COUNT(*) > 1 — duplicate detection',
+ code:`SELECT col, COUNT(*) AS n,
+       GROUP_CONCAT(id_col) AS ids
+FROM   table
+GROUP BY col
+HAVING COUNT(*) > 1
+ORDER BY n DESC`,
+ clauses:[
+  ['HAVING COUNT(*) > 1','Keeps only groups with more than one row — i.e. duplicates.',],
+  ['GROUP_CONCAT(col)','Concatenates values within a group into a comma-separated string. Useful to list the duplicate IDs.',],
+  ['TRIM() — optional','TRIM(col) removes leading/trailing whitespace. Near-duplicates caused by spaces will not match without it.',],
+  ['LENGTH(col) — optional','LENGTH(col) returns the number of characters. Flag suspiciously short (< 2) or long (> 100) values as data quality issues.',]
+]},
+{tag:'cw',name:'Date anomaly detection',
+ code:`-- start after end
+WHERE start_date > end_date
+-- Future dates
+WHERE date_col > date('now')
+-- Missing dates
+WHERE date_col IS NULL`,
+ clauses:[
+  ['start > end','A promotion or event cannot begin after it ends. Simple WHERE comparison catches this.',],
+  ['date(\'now\')','SQLite function returning today\'s date as \'YYYY-MM-DD\'.',],
+  ['Pattern','Any logical impossibility in date fields can be expressed as a WHERE condition.',]
+]},
+{tag:'cs',name:'UNION ALL — multi-check audit',
+ code:`SELECT 'label_1' AS issue, COUNT(*) AS n
+FROM   table WHERE condition_1
+UNION ALL
+SELECT 'label_2', COUNT(*)
+FROM   table WHERE condition_2
+UNION ALL
+SELECT 'label_3', COUNT(*)
+FROM   table WHERE condition_3`,
+ clauses:[
+  ['UNION ALL','Stacks result sets vertically. All SELECT statements must return the same number of columns with compatible types.',],
+  ['vs UNION','UNION removes duplicates (slow). UNION ALL keeps all rows (fast). In audit queries, always use UNION ALL.',],
+  ['Audit pattern','Each SELECT tests one data quality issue. Final result: one row per check, one column for count. Run this first on any new dataset.',]
+]},
+{tag:'fmt',name:'TRIM() / LTRIM() / RTRIM()',
+ code:`TRIM(col)           -- removes both ends
+LTRIM(col)          -- removes left (leading)
+RTRIM(col)          -- removes right (trailing)
+TRIM(col, 'chars')  -- removes specific characters`,
+ clauses:[
+  ['TRIM(col)','Removes spaces (or specified characters) from both ends of a string.',],
+  ['Use case','Near-duplicate detection: "Alex Chen" ≠ "Alex Chen " without TRIM.',],
+  ['Optional','Not needed when data is clean. Include defensively in GROUP BY keys for name deduplication.',]
+],opt:true},
+{tag:'fmt',name:'LENGTH()',
+ code:`LENGTH(col)
+-- Flag anomalies
+WHERE LENGTH(email) < 6
+WHERE LENGTH(name) > 100`,
+ clauses:[
+  ['LENGTH(col)','Returns the number of characters in a string, or the number of bytes in a BLOB.',],
+  ['Data quality use','Short values (< 2 chars) likely indicate truncation. Long values may indicate data entry errors.',]
+],opt:true}
+]}
+];
+
+function buildCheat(){
+  const body=document.getElementById('cheatBody');
+  let html='';
+  CHEAT.forEach(section=>{
+    html+=`<div class="cheat-week">${section.week}</div>`;
+    section.entries.forEach(e=>{
+      const opt=e.opt?`<span class="cheat-opt-badge">Optional</span>`:'';
+      const clauses=e.clauses.map(c=>`<div class="cheat-cl"><span class="cheat-cl-kw">${c[0]}</span><span class="cheat-cl-desc">${c[1]}</span></div>`).join('');
+      html+=`<div class="cheat-entry"><div class="cheat-entry-hdr" onclick="togCheatEntry(this)"><span class="cheat-entry-tag ${e.tag}">${e.tag.replace('cwn','WINDOW').replace('csb','SUBQUERY').replace('ct','CTE').replace('cs','SELECT').replace('cf','FROM/JOIN').replace('cw','WHERE').replace('cg','GROUP BY').replace('ch','HAVING').replace('co','ORDER BY').replace('fmt','FORMAT').toUpperCase()}</span><span class="cheat-entry-name">${e.name}${opt}</span></div><div class="cheat-entry-body"><div class="cheat-entry-code" onclick="runCheatSQL(this)" title="Click to run in editor">${e.code}</div><div class="cheat-clauses">${clauses}</div></div></div>`;
+    });
+  });
+  body.innerHTML=html;
+}
+
+
+const L={
+'1-1':{t:'Reading the Blueprint + The Grammar of Data',s:'Part 1: ER diagram literacy. Part 2: SELECT, WHERE, ORDER BY.',tier:1,c(){return`
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 1: Reading the ER Diagram</h2>
+
+<div class="cc"><h3>The Database is a Map</h3>
+<p>Before you write a single query, you need to read the map. An Entity-Relationship (ER) diagram shows every table, every column, and every connection in the database. If you can read this diagram, you already know how to write every JOIN in the course.</p>
+<p>Our database models a <strong>Bay Area coffee chain</strong>: 15 locations, 4,000 loyalty members, 15,000 transactions, 20 promotions.</p></div>
+
+<svg viewBox="0 0 760 440" style="width:100%;height:auto;margin:10px 0 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface)" xmlns="http://www.w3.org/2000/svg">
+<style>text{font-family:'DM Sans',sans-serif;fill:var(--text)}.tbl{fill:var(--surface);stroke:var(--border);stroke-width:1.5}.thd{fill:var(--usf-green)}.col{font-size:9px;fill:var(--text2)}.tn{font-size:11px;font-weight:700;fill:white}.pk{font-size:8px;font-weight:700;fill:var(--usf-gold-bright)}.fk{font-size:8px;fill:var(--c-where)}.rel{stroke:var(--usf-green);stroke-width:1.5;fill:none}.reld{stroke:var(--c-where);stroke-width:1.5;stroke-dasharray:5,3;fill:none}.card{font-size:8px;font-weight:700;fill:var(--c-where)}.warn{font-size:7px;font-weight:600;fill:var(--error)}</style>
+
+<rect class="tbl" x="10" y="10" width="160" height="155" rx="6"/>
+<rect class="thd" x="10" y="10" width="160" height="22" rx="6"/><rect class="thd" x="10" y="26" width="160" height="6"/>
+<text class="tn" x="90" y="26" text-anchor="middle">members</text>
+<text class="pk" x="18" y="46">PK</text><text class="col" x="40" y="46">member_id</text><text class="col" x="120" y="46">int</text>
+<text class="col" x="40" y="60">name</text><text class="col" x="120" y="60">text</text>
+<text class="col" x="40" y="74">tier</text><text class="col" x="120" y="74">text</text>
+<text class="col" x="40" y="88">join_date</text><text class="col" x="120" y="88">date</text>
+<text class="col" x="40" y="102">city</text><text class="col" x="120" y="102">text</text>
+<text class="col" x="40" y="116">total_points</text><text class="col" x="120" y="116">real</text>
+<text class="warn" x="90" y="152" text-anchor="middle">~15 duplicates</text>
+
+<rect class="tbl" x="250" y="10" width="180" height="155" rx="6"/>
+<rect class="thd" x="250" y="10" width="180" height="22" rx="6"/><rect class="thd" x="250" y="26" width="180" height="6"/>
+<text class="tn" x="340" y="26" text-anchor="middle">transactions</text>
+<text class="pk" x="258" y="46">PK</text><text class="col" x="280" y="46">txn_id</text><text class="col" x="380" y="46">int</text>
+<text class="fk" x="258" y="60">FK</text><text class="col" x="280" y="60">member_id</text><text class="col" x="380" y="60">int</text>
+<text class="fk" x="258" y="74">FK</text><text class="col" x="280" y="74">location_id</text><text class="col" x="380" y="74">int</text>
+<text class="col" x="280" y="88">txn_date</text><text class="col" x="380" y="88">date</text>
+<text class="col" x="280" y="102">total_amount</text><text class="col" x="380" y="102">real</text>
+<text class="col" x="280" y="116">tip_amount</text><text class="col" x="380" y="116">real</text>
+<text class="col" x="280" y="130">order_type</text><text class="col" x="380" y="130">text</text>
+<text class="warn" x="400" y="60">40 orphans</text>
+<text class="warn" x="380" y="122">~25% NULL</text>
+
+<rect class="tbl" x="510" y="10" width="160" height="115" rx="6"/>
+<rect class="thd" x="510" y="10" width="160" height="22" rx="6"/><rect class="thd" x="510" y="26" width="160" height="6"/>
+<text class="tn" x="590" y="26" text-anchor="middle">txn_items</text>
+<text class="pk" x="518" y="46">PK</text><text class="col" x="540" y="46">id</text><text class="col" x="620" y="46">int</text>
+<text class="fk" x="518" y="60">FK</text><text class="col" x="540" y="60">txn_id</text><text class="col" x="620" y="60">int</text>
+<text class="fk" x="518" y="74">FK</text><text class="col" x="540" y="74">item_id</text><text class="col" x="620" y="74">int</text>
+<text class="col" x="540" y="88">quantity</text><text class="col" x="620" y="88">int</text>
+<text class="col" x="540" y="102">customization</text><text class="col" x="620" y="102">text</text>
+
+<rect class="tbl" x="510" y="160" width="160" height="115" rx="6"/>
+<rect class="thd" x="510" y="160" width="160" height="22" rx="6"/><rect class="thd" x="510" y="176" width="160" height="6"/>
+<text class="tn" x="590" y="176" text-anchor="middle">menu_items</text>
+<text class="pk" x="518" y="196">PK</text><text class="col" x="540" y="196">item_id</text><text class="col" x="620" y="196">int</text>
+<text class="col" x="540" y="210">item_name</text><text class="col" x="620" y="210">text</text>
+<text class="col" x="540" y="224">category</text><text class="col" x="620" y="224">text</text>
+<text class="col" x="540" y="238">price</text><text class="col" x="620" y="238">real</text>
+<text class="col" x="540" y="252">calories</text><text class="col" x="620" y="252">int</text>
+
+<rect class="tbl" x="250" y="210" width="180" height="95" rx="6"/>
+<rect class="thd" x="250" y="210" width="180" height="22" rx="6"/><rect class="thd" x="250" y="226" width="180" height="6"/>
+<text class="tn" x="340" y="226" text-anchor="middle">locations</text>
+<text class="pk" x="258" y="246">PK</text><text class="col" x="280" y="246">location_id</text><text class="col" x="385" y="246">int</text>
+<text class="col" x="280" y="260">store_name</text><text class="col" x="385" y="260">text</text>
+<text class="col" x="280" y="274">city</text><text class="col" x="385" y="274">text</text>
+<text class="col" x="280" y="288">seating_capacity</text><text class="col" x="385" y="288">int</text>
+
+<rect class="tbl" x="10" y="220" width="160" height="115" rx="6"/>
+<rect class="thd" x="10" y="220" width="160" height="22" rx="6"/><rect class="thd" x="10" y="236" width="160" height="6"/>
+<text class="tn" x="90" y="236" text-anchor="middle">promotions</text>
+<text class="pk" x="18" y="256">PK</text><text class="col" x="40" y="256">promo_id</text><text class="col" x="125" y="256">int</text>
+<text class="col" x="40" y="270">promo_name</text><text class="col" x="125" y="270">text</text>
+<text class="col" x="40" y="284">start_date</text><text class="col" x="125" y="284">date</text>
+<text class="col" x="40" y="298">end_date</text><text class="col" x="125" y="298">date</text>
+<text class="col" x="40" y="312">budget</text><text class="col" x="125" y="312">real</text>
+<text class="warn" x="90" y="330" text-anchor="middle">#8: start > end</text>
+
+<rect class="tbl" x="10" y="370" width="180" height="60" rx="6"/>
+<rect class="thd" x="10" y="370" width="180" height="22" rx="6"/><rect class="thd" x="10" y="386" width="180" height="6"/>
+<text class="tn" x="100" y="386" text-anchor="middle">promo_touches</text>
+<text class="pk" x="18" y="406">PK</text><text class="col" x="40" y="406">touch_id</text>
+<text class="fk" x="18" y="420">FK</text><text class="col" x="40" y="420">promo_id, member_id, touch_date, response</text>
+
+<!-- ═══ CROW'S FOOT RELATIONSHIPS ═══ -->
+
+<!-- 1. members → transactions: HORIZONTAL, 0,1:N (dashed) -->
+<!-- Zero-or-one side (members): circle + bar -->
+<circle cx="177" cy="60" r="4.5" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="186" y1="52" x2="186" y2="68" stroke="var(--c-where)" stroke-width="1.5"/>
+<!-- Dashed line -->
+<line x1="186" y1="60" x2="241" y2="60" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3"/>
+<!-- Crow's foot (transactions, many side) -->
+<path d="M241,52 L250,60 L241,68" stroke="var(--c-where)" stroke-width="1.5" fill="none"/>
+<line x1="241" y1="60" x2="250" y2="60" stroke="var(--c-where)" stroke-width="1.5"/>
+
+<!-- 2. locations → transactions: VERTICAL, 1:N (solid) -->
+<!-- One bar (locations side, bottom) -->
+<line x1="333" y1="208" x2="347" y2="208" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="333" y1="204" x2="347" y2="204" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="340" y1="204" x2="340" y2="173" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (transactions side, top) -->
+<path d="M333,173 L340,165 L347,173" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="340" y1="173" x2="340" y2="165" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 3. transactions → txn_items: HORIZONTAL, 1:N (solid) -->
+<!-- One bar (transactions side, left) -->
+<line x1="433" y1="52" x2="433" y2="68" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="437" y1="52" x2="437" y2="68" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="437" y1="60" x2="501" y2="60" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (txn_items side, right) -->
+<path d="M501,52 L510,60 L501,68" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="501" y1="60" x2="510" y2="60" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 4. menu_items → txn_items: VERTICAL, 1:N (solid) -->
+<!-- One bar (menu_items side, top) -->
+<line x1="583" y1="162" x2="597" y2="162" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="583" y1="158" x2="597" y2="158" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="590" y1="158" x2="590" y2="133" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (txn_items side, bottom) -->
+<path d="M583,133 L590,125 L597,133" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="590" y1="133" x2="590" y2="125" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 5. promotions → promo_touches: VERTICAL, 1:N (solid) -->
+<!-- One bar (promotions side, bottom) -->
+<line x1="83" y1="337" x2="97" y2="337" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="83" y1="341" x2="97" y2="341" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Solid line -->
+<line x1="90" y1="341" x2="90" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<!-- Crow's foot (promo_touches side, top) -->
+<path d="M83,362 L90,370 L97,362" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="90" y1="362" x2="90" y2="370" stroke="var(--usf-green)" stroke-width="1.5"/>
+
+<!-- 6. members → promo_touches: ROUTED PATH, 0,1:N (dashed) -->
+<!-- Zero-or-one side (members): circle + bar -->
+<circle cx="177" cy="116" r="4.5" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="186" y1="109" x2="186" y2="123" stroke="var(--c-where)" stroke-width="1.5"/>
+<!-- Dashed routed line -->
+<path d="M186,116 L204,116 L204,400 L199,400" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3" fill="none"/>
+<!-- Crow's foot (promo_touches side, right end) -->
+<path d="M199,393 L190,400 L199,407" stroke="var(--c-where)" stroke-width="1.5" fill="none"/>
+<line x1="199" y1="400" x2="190" y2="400" stroke="var(--c-where)" stroke-width="1.5"/>
+
+<!-- ═══ LEGEND ═══ -->
+<rect x="475" y="320" width="270" height="110" rx="6" fill="var(--surface2)" stroke="var(--border)" stroke-width="0.5"/>
+<text x="488" y="338" style="font-size:10px;font-weight:700;fill:var(--text)">Crow's Foot Notation</text>
+
+<!-- One (mandatory) -->
+<line x1="488" y1="356" x2="530" y2="356" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="526" y1="350" x2="526" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<line x1="530" y1="350" x2="530" y2="362" stroke="var(--usf-green)" stroke-width="1.5"/>
+<text x="538" y="360" style="font-size:9px;fill:var(--text2)">Exactly one</text>
+
+<!-- Zero-or-one -->
+<line x1="488" y1="376" x2="520" y2="376" stroke="var(--c-where)" stroke-width="1.5" stroke-dasharray="5,3"/>
+<circle cx="525" cy="376" r="4" fill="var(--surface)" stroke="var(--c-where)" stroke-width="1.5"/>
+<line x1="530" y1="370" x2="530" y2="382" stroke="var(--c-where)" stroke-width="1.5"/>
+<text x="538" y="380" style="font-size:9px;fill:var(--text2)">Zero or one (orphans)</text>
+
+<!-- Many -->
+<line x1="488" y1="396" x2="522" y2="396" stroke="var(--usf-green)" stroke-width="1.5"/>
+<path d="M522,390 L530,396 L522,402" stroke="var(--usf-green)" stroke-width="1.5" fill="none"/>
+<line x1="522" y1="396" x2="530" y2="396" stroke="var(--usf-green)" stroke-width="1.5"/>
+<text x="538" y="400" style="font-size:9px;fill:var(--text2)">Many</text>
+
+<!-- Data quality badge -->
+<text x="488" y="420" style="font-size:7px;font-weight:600;fill:var(--error)">⚠ ~25% NULL</text>
+<text x="545" y="420" style="font-size:9px;fill:var(--text2)">Data quality issue</text>
+</svg>
+
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Read the Diagram: Five Steps</h3>
+
+${sc(1,'TABLE','cs','Read a table box',
+syn('SELECT [* | column, ...]\nFROM   table_name\n[LIMIT  n]',[['SELECT','Columns to return. * returns all columns.'],['FROM','The source table — pick it from the ER diagram.'],['LIMIT','Optional. Caps rows returned. Use while exploring schema.']])+'Each box is a table. The header is the table name. Inside: column names with types. <strong>PK</strong> (Primary Key) = unique identifier for each row. Every table has one.',
+'SELECT *\nFROM members\nLIMIT 5;',
+'Confirm: the columns match the diagram. member_id, name, tier, join_date, city, total_points.',true)}
+
+${sc(2,'RELATIONSHIP','cf','Read a relationship line',
+'An arrow between two tables means they share a column. <strong>FK</strong> (Foreign Key) = "this column points to a PK in another table." The line from <strong>members</strong> to <strong>transactions</strong> means transactions.member_id references members.member_id.',
+'SELECT member_id, txn_date, total_amount\nFROM transactions\nLIMIT 5;',
+'member_id is just a number here. The ER line tells you WHERE to look up the name.')}
+
+${sc(3,'CARDINALITY','cf','Read the crow\'s feet',
+'Crow\'s foot notation uses symbols at each end of the line. <strong>Double bar ||</strong> = exactly one. <strong>Fork &gt;</strong> = many. <strong>Circle + bar O|</strong> = zero or one (orphans possible). Read it left to right: one member \u2192 many transactions. The fork always points at the "many" table.',
+'SELECT member_id, COUNT(*) AS txn_count\nFROM transactions\nWHERE member_id = 42\nGROUP BY member_id;',
+'One member, N transactions. The diagram told you this before you wrote the query.')}
+
+${sc(4,'JOIN','cf','Translate a line to SQL',
+syn('SELECT t1.col, t2.col\nFROM   table1 t1\nINNER JOIN table2 t2\n  ON t1.foreign_key = t2.primary_key',[['INNER JOIN','Returns only matched rows. Non-matching rows (orphans) are silently dropped.'],['ON','The join condition — always a FK-to-PK match. Read it directly from the ER diagram line.'],['Alias','Short name after table (m, t). Required when columns share names across tables.']])+'Every relationship line IS a JOIN condition. The line from members.member_id \u2192 transactions.member_id translates directly to <code>ON m.member_id = t.member_id</code>. You never have to guess the ON clause \u2014 the diagram tells you.',
+'SELECT m.name, m.tier, t.txn_date, t.total_amount\nFROM members m\nINNER JOIN transactions t\n  ON m.member_id = t.member_id\nLIMIT 10;',
+'The diagram line became the ON clause. Every JOIN in this course works the same way.')}
+
+${sc(5,'WARNINGS','cw','Read circles and red badges',
+syn('FROM table1 t1\nLEFT JOIN table2 t2\n  ON t1.fk = t2.pk\nWHERE t2.pk IS NULL',[['LEFT JOIN','Keeps ALL left-table rows. Fills NULLs where no match exists in the right table.'],['WHERE IS NULL','Added after LEFT JOIN to isolate unmatched (orphan) rows only.']])+'A <strong>circle (O)</strong> on a relationship line means "zero" is possible \u2014 some child rows point to parents that don\'t exist (orphan records). The <strong>dashed line</strong> reinforces this. Compare: the solid double-bar from locations to transactions means every transaction has a valid location. The dashed circle-bar from members to transactions means ~40 transactions have invalid member_ids. <strong>Red badges</strong> flag data quality issues. INNER JOIN drops orphans silently. LEFT JOIN reveals them.',
+'SELECT t.txn_id, t.member_id, m.name\nFROM transactions t\nLEFT JOIN members m\n  ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;',
+'~40 orphans. The dashed line predicted this. Solid lines (like locations \u2192 transactions) have zero orphans.')}
+
+<div class="co2 k"><strong>Key Takeaway:</strong> Every JOIN you will write in this course comes from a line on this diagram. PK and FK labels tell you the ON clause. Double bars (||) mean every row matches; a circle (O) means orphans exist and INNER JOIN will silently drop rows. The crow\u2019s foot (fork) always points at the \u201Cmany\u201D table. Red badges mark data quality traps.</div>
+
+<div class="pb"><h4>Diagram Exercises</h4><ol>
+<li><strong>Trace the path:</strong> How would you get from menu_items to members? Count the crow\u2019s feet you cross. (menu_items \u2192 txn_items \u2192 transactions \u2192 members = 3 JOINs)</li>
+<li><strong>Predict the problem:</strong> The line from members to promo_touches has a circle on the members side. What does this mean? What happens with INNER JOIN? (The circle means \u201Czero\u201D is possible \u2014 80 orphan touches disappear silently)</li>
+<li><strong>Read the badge:</strong> What does "~25% NULL" on tip_amount mean for an AVG(tip_amount) calculation? (Denominator is smaller than you think)</li>
+</ol></div>
+
+<hr class="sd">
+
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 2: The Grammar of Data</h2>
+
+${abar(['cs','cf','cw'])}
+
+<div class="cc"><h3>The Query Pattern</h3><p>Every SQL query follows the same structure, clause by clause:</p>
+<p><strong style="color:var(--c-select)">SELECT</strong> \u2192 What columns to show (you read these from the table box)<br>
+<strong style="color:var(--c-from)">FROM</strong> \u2192 Which table (you pick this from the diagram)<br>
+<strong style="color:var(--c-where)">WHERE</strong> \u2192 Which rows to keep (filter on column values)<br>
+<strong style="color:var(--c-order)">ORDER BY</strong> \u2192 How to sort the result</p></div>
+
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Gold members in San Francisco, ranked by points"</h3>
+
+${sc(6,'SELECT','cs','Choose your columns',
+syn('SELECT col1 [, col2, ...]\nFROM   table_name\nWHERE  condition [AND | OR condition]\nORDER BY col [ASC | DESC]',[['SELECT','Named columns only return what you need. * returns all columns.'],['FROM','Source table.'],['WHERE','Filters rows before returning results. NULLs evaluate as UNKNOWN — not TRUE.'],['AND / OR','AND requires both conditions true. OR requires either.'],['ORDER BY','Sorts results. ASC = lowest first (default). DESC = highest first.']])+opt('LIKE — text pattern matching',['WHERE name LIKE \'Alex%\'     -- starts with Alex','WHERE email LIKE \'%@gmail%\'  -- contains','WHERE city LIKE \'_alo%\'      -- single-char wildcard'],'Use % for any-length wildcard, _ for single-character wildcard.')+opt('UPPER() / LOWER() — normalise case',['WHERE UPPER(city) = \'SAN FRANCISCO\'','WHERE LOWER(email) LIKE \'%@gmail%\''],'Prevents missed matches when data has inconsistent capitalisation.')+'Look at the members box in the ER diagram. Pick the columns you need. SELECT * shows everything; named columns show only what matters.',
+'SELECT name, tier, city, total_points\nFROM members\nLIMIT 5;',
+'All members, all tiers, all cities \u2014 no filter yet.')}
+
+${sc(7,'WHERE','cw','Filter the rows',
+'AND means both conditions must be true. Strings require single quotes. These filter on columns you can see in the diagram.',
+"SELECT name, tier, city, total_points\nFROM members\nWHERE tier = 'Gold'\n  AND city = 'San Francisco';",
+'Only Gold + San Francisco. Row count drops significantly.')}
+
+${sc(8,'ORDER BY','co','Sort the results',
+'DESC = highest first. ASC = lowest first (default).',
+"SELECT name, tier, city, total_points\nFROM members\nWHERE tier = 'Gold'\n  AND city = 'San Francisco'\nORDER BY total_points DESC;",
+'Same rows, now ranked. The complete query.')}
+
+<hr class="sd">
+
+<h2 style="font-size:18px;font-weight:700;color:var(--usf-green);margin:20px 0 12px;border-bottom:2px solid var(--border);padding-bottom:8px">Part 3: The NULL Trap</h2>
+
+<div class="cc"><h3>Live Demo</h3>
+<p>Look at the ER diagram: tip_amount has a red badge saying "~25% NULL." Let's see what that does to our queries.</p></div>
+
+<div class="sxm" onclick="lr(this)">-- Step A: Total transactions
+SELECT COUNT(*) AS total_txns FROM transactions;</div>
+<div class="sxm" onclick="lr(this)">-- Step B: Transactions with a tip
+SELECT COUNT(*) AS tipped
+FROM transactions
+WHERE tip_amount > 0;</div>
+
+<div class="co2 d"><strong>The ER diagram warned you.</strong> The red "~25% NULL" badge on tip_amount means WHERE tip_amount > 0 evaluates NULL > 0 as UNKNOWN \u2192 treated as FALSE \u2192 rows dropped silently. The diagram is not just a map of tables \u2014 it's a map of traps.</div>
+
+<div class="pb"><h4>Practice</h4><ol>
+<li>List all Espresso items sorted by price descending (read columns from menu_items box)</li>
+<li>Find mobile transactions over $15 (read columns from transactions box)</li>
+<li>Count members who joined in 2024</li>
+<li><strong>Diagram challenge:</strong> Write a query joining transactions to locations to show store_name with each transaction. Use the ER diagram to find the ON clause.</li>
+</ol></div>`;
+}},
+'1-2':{t:'Connecting Tables',s:'JOINs link separate tables into one result set.',tier:1,c(){return`
+${abar(['cs','cf'])}
+<div class="cc"><h3>Why Tables Are Separate</h3><p>"Average spend per loyalty tier?" Tier is in <strong>members</strong>. Spend is in <strong>transactions</strong>. JOIN connects them.</p></div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Transactions with member names"</h3>
+${sc(1,'FROM','cf','Start with one table','What does a raw transaction row look like?','SELECT *\nFROM transactions\nLIMIT 5;','member_id is just a number. No name.',true)}
+${sc(2,'JOIN','cf','Connect to members','INNER JOIN keeps only matched rows. Orphans dropped silently.','SELECT m.name, m.tier, t.txn_date, t.total_amount\nFROM members m\nINNER JOIN transactions t\n  ON m.member_id = t.member_id\nLIMIT 10;','~15,000 rows. Names visible. Orphans excluded.')}
+${sc(3,'LEFT JOIN','cf','Preserve unmatched rows','LEFT JOIN keeps ALL left-table rows. NULLs fill the gaps.','SELECT m.name, m.tier, t.txn_id\nFROM members m\nLEFT JOIN transactions t\n  ON m.member_id = t.member_id\nWHERE t.txn_id IS NULL\nLIMIT 20;','Members with no transactions. NULL txn_id = no match.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Find orphan transactions"</h3>
+${sc(4,'FROM','cf','Flip the join direction','Now transactions goes LEFT. This finds orders from deleted or invalid accounts.','SELECT t.txn_id, t.member_id, t.total_amount, m.name\nFROM transactions t\nLEFT JOIN members m\n  ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;','~40 orphans. INNER JOIN would silently exclude these from revenue.')}
+<div class="co2 d"><strong>~40 orphan transactions.</strong> Deleted accounts? Migration errors? INNER JOIN hides these from every report.</div>
+<div class="pb"><h4>Your Turn</h4><ol><li>Show each transaction with its store name (JOIN transactions + locations)</li><li>Find promotions with zero touches (LEFT JOIN + IS NULL)</li></ol></div>`;}},
+
+'1-3':{t:'Aggregation & KPIs',s:'GROUP BY collapses rows into summaries. HAVING filters those summaries.',tier:1,c(){return`
+${abar(['cs','cf','cw','cg','ch','co'])}
+<div class="co2 w"><strong>AI is now unlocked.</strong> Workflow: prompt \u2192 receive SQL \u2192 read clause by clause \u2192 predict output \u2192 run \u2192 compare.</div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Average spend + unique members per tier"</h3>
+${sc(1,'SELECT + FROM','cs','Start with raw joined data','Before aggregating, examine one row. What does it represent?','SELECT m.tier, m.member_id, t.total_amount\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nLIMIT 10;','One row = one transaction. A Gold member with 10 orders appears 10 times.',true)}
+${sc(2,'GROUP BY','cg','Collapse into groups',syn('SELECT  col,\n        COUNT(*) AS n,\n        COUNT(DISTINCT col2) AS unique_n\nFROM    table\n[WHERE  condition]\nGROUP BY col',[['GROUP BY','Collapses all rows with the same value into one summary row.'],['COUNT(*)','Counts every row in the group, including NULLs.'],['COUNT(DISTINCT col)','Counts unique non-NULL values. Prevents fan-out inflation when the source table is joined.']])+'GROUP BY tier turns thousands of rows into 3 summary rows.','SELECT m.tier,\n       COUNT(*) AS txn_count\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nGROUP BY m.tier;','3 rows. But COUNT counts transactions, not unique members.')}
+${sc(3,'DISTINCT','cs','Fix the fan-out',syn('ROUND(value, decimal_places)\nAVG(col)\nSUM(col)',[['AVG(col)','Mean of non-NULL values. NULLs excluded from numerator AND denominator.'],['SUM(col)','Total of non-NULL values.'],['ROUND(v, n)','Round to n decimal places. n=2 for currency, n=4 for rates.']])+opt('printf() — display formatting',['printf(\'$%.2f\', value)   -- $12.50','printf(\'%.1f%%\', value)  -- 43.2%'],'SQLite string formatting for human-readable output. Use for display only — do not filter or sort on printf output.')+'COUNT(DISTINCT member_id) counts unique people, not repeated rows.','SELECT m.tier,\n       ROUND(AVG(t.total_amount), 2) AS avg_spend,\n       COUNT(DISTINCT m.member_id) AS unique_members,\n       COUNT(t.txn_id) AS total_txns\nFROM members m\nJOIN transactions t ON m.member_id = t.member_id\nGROUP BY m.tier;','unique_members is correct now. Compare to Step 2.')}
+<div class="co2 d"><strong>The DISTINCT Trap:</strong> Without DISTINCT, Gold looks like the biggest segment. It is not \u2014 Gold members just order more often.</div>
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Promo redemption rate per campaign"</h3>
+${sc(4,'CASE WHEN','cs','Count conditionally',syn('CASE WHEN condition THEN return_value\n     [WHEN condition THEN return_value ...]\n     [ELSE default_value]\nEND',[['CASE WHEN','Evaluates conditions in order. Returns the value for the FIRST matching WHEN.'],['ELSE','Optional fallback. Without ELSE, unmatched rows return NULL.'],['Inside COUNT','COUNT(CASE WHEN x THEN 1 END) — counts rows matching the condition.'],['Inside SUM','SUM(CASE WHEN x THEN value ELSE 0 END) — ELSE 0 prevents NULL propagation.']])+'CASE WHEN inside COUNT isolates a specific response type.','SELECT p.promo_name,\n       COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END) AS redemptions,\n       COUNT(pt.touch_id) AS touches\nFROM promotions p\nJOIN promo_touches pt ON p.promo_id = pt.promo_id\nGROUP BY p.promo_name;','20 rows with counts. Now calculate the rate...')}
+${sc(5,'1.0 *','cs','Avoid integer division',syn('-- Wrong: integer ÷ integer truncates\nSELECT 3 / 4;               -- 0\n-- Fix: force float\nSELECT 1.0 * 3 / 4;        -- 0.75\nSELECT CAST(3 AS REAL) / 4; -- 0.75',[['Integer division','SQLite divides two integers and truncates the decimal. Result < 1 always becomes 0.'],['1.0 *','Multiply first operand by 1.0 to force float arithmetic.'],['CAST(x AS REAL)','Explicit type conversion. More readable in production code.']])+opt('CAST() — explicit type conversion',['CAST(value AS REAL)   -- integer to float','CAST(value AS TEXT)   -- number to string','CAST(value AS INTEGER) -- float to integer (truncates)'],'Use CAST when the intent should be obvious to a future reader.')+'Without 1.0 *, SQLite does integer division: anything less than 1 becomes 0.','SELECT p.promo_name,\n       COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END) AS redemptions,\n       COUNT(pt.touch_id) AS touches,\n       ROUND(1.0 * COUNT(CASE WHEN pt.response = \'redeemed\' THEN 1 END)\n             / COUNT(pt.touch_id), 4) AS rate\nFROM promotions p\nJOIN promo_touches pt ON p.promo_id = pt.promo_id\nGROUP BY p.promo_name\nORDER BY rate DESC;','Remove the 1.0 * and watch every rate drop to 0.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Stores with revenue over $100K"</h3>
+${sc(6,'HAVING','ch','Filter AFTER grouping',syn('SELECT  col, aggregate_fn(col2) AS n\nFROM    table\n[WHERE  row_level_condition]\nGROUP BY col\nHAVING  aggregate_fn(col2) > threshold',[['HAVING','Filters AFTER grouping. Operates on aggregate results, not individual rows.'],['vs WHERE','WHERE filters rows before GROUP BY. HAVING filters groups after. They are not interchangeable.'],['Rule','Any condition using COUNT / SUM / AVG / MIN / MAX must go in HAVING — never WHERE.']])+'WHERE filters rows before grouping. HAVING filters groups after aggregation. You cannot put SUM() in WHERE.','SELECT l.store_name,\n       ROUND(SUM(t.total_amount), 2) AS revenue\nFROM locations l\nJOIN transactions t ON l.location_id = t.location_id\nGROUP BY l.store_name\nHAVING SUM(t.total_amount) > 100000\nORDER BY revenue DESC;','Only stores above $100K. Move HAVING to WHERE \u2014 error.')}
+<div class="pb"><h4>Your Turn</h4><ol><li>Most popular menu item by total quantity sold</li><li>Monthly transaction count for 2024 (YYYY-MM)</li><li>Revenue per location per month</li></ol></div>`;}},
+
+'2-4':{t:'Subqueries & Comparisons',s:'Nest queries for per-group comparisons and period-over-period analysis.',tier:2,c(){return`
+${abar(['cs','cf','cw','cg'])}
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Members with points > 2x their tier average"</h3>
+${sc(1,'SUBQUERY','csb','Calculate per-tier averages first',syn('SELECT outer.col, sub.alias\nFROM   outer_table outer\nJOIN (\n  SELECT key_col,\n         aggregate_fn(col) AS alias\n  FROM   inner_table\n  GROUP BY key_col\n) sub\n  ON outer.key_col = sub.key_col',[['Subquery in FROM','Any SELECT wrapped in parentheses becomes a derived table. Must be aliased.'],['Execution order','Inner query runs first. Outer query reads its result as a named table.'],['Use case','Calculate per-group aggregates, then JOIN back to individual rows.']])+'Start with the inner query. This becomes a derived table.','SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\nFROM members\nGROUP BY tier;','3 rows \u2014 one average per tier. This is the building block.',true)}
+${sc(2,'JOIN','cf','Attach averages back to individuals','Wrap Step 1 in parentheses, alias it, JOIN back to members.','SELECT m.name, m.tier, m.total_points, ta.avg_pts\nFROM members m\nJOIN (SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\n      FROM members GROUP BY tier) ta\n  ON m.tier = ta.tier\nLIMIT 10;','Every member now has their tier average attached.')}
+${sc(3,'WHERE','cw','Filter to outliers','Compare each member to 2x their own tier average.','SELECT m.name, m.tier, m.total_points,\n       ta.avg_pts AS tier_avg\nFROM members m\nJOIN (SELECT tier, ROUND(AVG(total_points), 2) AS avg_pts\n      FROM members GROUP BY tier) ta\n  ON m.tier = ta.tier\nWHERE m.total_points > 2 * ta.avg_pts\nORDER BY m.total_points DESC;','Each compared to THEIR tier, not the overall average.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Q3 vs Q4 revenue by order type"</h3>
+${sc(4,'CASE WHEN','cs','Create pivot columns',syn('SUM(CASE WHEN col BETWEEN x AND y\n    THEN value ELSE 0 END) AS period_label',[['Pivot pattern','Creates side-by-side period columns from a single date column. No JOIN required.'],['BETWEEN x AND y','Inclusive range. Equivalent to col >= x AND col <= y.'],['ELSE 0','Without ELSE 0, rows outside the condition contribute NULL, which poisons SUM.']])+'CASE WHEN inside SUM creates side-by-side columns. ELSE 0 prevents NULL.','SELECT order_type,\n  ROUND(SUM(CASE WHEN txn_date BETWEEN \'2024-07-01\' AND \'2024-09-30\'\n      THEN total_amount ELSE 0 END), 2) AS q3,\n  ROUND(SUM(CASE WHEN txn_date BETWEEN \'2024-10-01\' AND \'2024-12-31\'\n      THEN total_amount ELSE 0 END), 2) AS q4\nFROM transactions\nGROUP BY order_type;','Side-by-side comparison. Add a change column as practice.')}
+<div class="pb"><h4>Your Turn</h4><ol>
+<li><strong>Above-average spenders per tier:</strong> Find members whose total_points exceed 1.5&times; their own tier average. Use a derived table to calculate tier averages, then JOIN back to members.</li>
+<li><strong>Channel comparison pivot:</strong> For each promotion channel (email, push_notification, in_app, sms, social), pivot redeemed vs clicked counts into side-by-side columns using CASE WHEN. Use BETWEEN to isolate 2024 data.</li>
+<li><strong>Debug challenge:</strong> A colleague wrote the query below to find promotions with more than 50 redemptions. It errors. Identify the problem and fix it:<br><code>SELECT promo_name, COUNT(*) AS redemptions FROM promotions JOIN promo_touches ON promotions.promo_id = promo_touches.promo_id WHERE response = 'redeemed' WHERE COUNT(*) > 50;</code></li>
+</ol></div>
+<div class="co2 k"><strong>Any SELECT can be wrapped in parentheses and used as a FROM source.</strong> Think of it as a temporary table that exists only for this query.</div>`;}},
+
+'3-5':{t:'Advanced Patterns',s:'Window functions and CTEs \u2014 built piece by piece.',tier:3,c(){return`
+${abar(['cs','cf','cw','cg','co'])}
+<div class="co2 w"><strong>Full AI access.</strong> Every query requires annotation: why this structure, errors caught, confidence assessment.</div>
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Rank members by points within each tier"</h3>
+${sc(1,'SELECT','cs','Start with base data','Confirm the raw data before adding window functions.','SELECT name, tier, total_points\nFROM members\nORDER BY tier, total_points DESC\nLIMIT 15;','Sorted but no rank number yet.',true)}
+${sc(2,'WINDOW','cwn','Add RANK() with PARTITION BY',syn('RANK() OVER (\n  [PARTITION BY partition_col]\n   ORDER BY sort_col [ASC | DESC]\n)',[['RANK()','Rank number within partition. Ties share a rank; next rank skips (1,1,3…).'],['OVER','Opens the window function clause. Required for all window functions.'],['PARTITION BY','Resets rank counter per group. Omit for a global (un-partitioned) rank.'],['ORDER BY','Determines ranking direction within each partition.']])+'RANK() OVER (...) adds a column without collapsing rows. PARTITION BY resets per tier.','SELECT name, tier, total_points,\n       RANK() OVER (\n         PARTITION BY tier\n         ORDER BY total_points DESC\n       ) AS tier_rank\nFROM members\nORDER BY tier, tier_rank\nLIMIT 20;','Each tier starts at rank 1. Without PARTITION BY \u2192 global rank.')}
+${sc(3,'SUBQUERY','csb','Filter on window result',syn('NTILE(number_of_buckets) OVER (\n  [PARTITION BY partition_col]\n   ORDER BY sort_col [ASC | DESC]\n)',[['NTILE(n)','Divides rows into n equal-sized buckets. Returns bucket number 1 through n.'],['PARTITION BY','Optional. Resets buckets per group value.'],['ORDER BY','Required. Determines which rows fall into which bucket.'],['Wrapping rule','Cannot use WHERE on a window function in the same SELECT. Wrap in a subquery: SELECT * FROM (...) WHERE bucket_col = 1']])+'Cannot WHERE on a window function in the same SELECT. Wrap it.','SELECT * FROM (\n  SELECT name, tier, total_points,\n         NTILE(10) OVER (\n           PARTITION BY tier\n           ORDER BY total_points DESC\n         ) AS decile\n  FROM members\n) ranked\nWHERE decile = 1\nORDER BY tier, total_points DESC;','Top 10% per tier. The Platinum candidate list.')}
+<hr class="sd">
+<h3 style="margin:18px 0 10px;font-size:14px">\u2B50 Build: "Month-over-month revenue growth"</h3>
+${sc(4,'CTE','ct','Step 1 \u2014 Monthly totals',syn('WITH cte_name AS (\n  SELECT col, aggregate_fn(col2) AS alias\n  FROM   table\n  GROUP BY col\n)\nSELECT cte_name.col, cte_name.alias\nFROM   cte_name\n[ORDER BY col]',[['WITH','Opens CTE definition. Multiple CTEs: WITH a AS (...), b AS (...)'],['AS (…)','The subquery defining the CTE. Executes before the main SELECT.'],['Purpose','Names a complex subquery for readability. Essential for multi-step time-series analysis.'],['strftime()','strftime(\"%%Y-%%m\", date_col) — groups dates by year-month. Sorts correctly as a string.']])+opt('strftime() format options',['strftime(\'%Y-%m\', date_col)   -- 2024-03 (use for GROUP BY)','strftime(\'%Y\', date_col)      -- 2024','strftime(\'%B %Y\', date_col)   -- March 2024 (display only)'],'Use %Y-%m for GROUP BY — it sorts chronologically as a string. Use %B %Y for human-readable display only.')+'WITH creates a named temporary result set. Build the foundation first.','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT * FROM monthly ORDER BY month;','12 rows. One per month. Foundation is set.')}
+${sc(5,'WINDOW','cwn','Step 2 \u2014 Add LAG()',syn('LAG(col [, offset [, default]]) OVER (\n  [PARTITION BY partition_col]\n   ORDER BY sort_col\n)',[['LAG(col)','Value of col from the previous row in the window order.'],['offset','Number of rows to look back. Default is 1.'],['default','Returned when no prior row exists (first row). Default is NULL.'],['NULL on first row','Correct behavior. Do NOT COALESCE to 0 — causes division by zero in growth % calculations.'],['LEAD(col)','Forward-looking equivalent: returns value from the next row.']])+'LAG(revenue) looks at the previous row. First row is NULL (correct \u2014 no prior month).','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT month, revenue,\n       LAG(revenue) OVER (ORDER BY month) AS prev\nFROM monthly ORDER BY month;','prev is NULL for January. Do NOT use a default of 0 (causes division by zero).')}
+${sc(6,'SELECT','cs','Step 3 \u2014 Calculate growth %','The complete query.','WITH monthly AS (\n  SELECT strftime(\'%Y-%m\', txn_date) AS month,\n         ROUND(SUM(total_amount), 2) AS revenue\n  FROM transactions\n  WHERE txn_date >= \'2024-01-01\'\n  GROUP BY strftime(\'%Y-%m\', txn_date)\n)\nSELECT month, revenue,\n       LAG(revenue) OVER (ORDER BY month) AS prev_month,\n       ROUND(100.0 * (revenue - LAG(revenue) OVER (ORDER BY month))\n             / LAG(revenue) OVER (ORDER BY month), 1) AS growth_pct\nFROM monthly ORDER BY month;','12 rows. January = NULL. Every other month shows % change.')}
+<div class="pb"><h4>Your Turn</h4><ol>
+<li><strong>Top 3 per tier:</strong> Rank members by total_points within each tier using RANK(). Filter to rank &le; 3. Remember: you cannot filter on RANK() in the same SELECT — wrap it in a subquery first.</li>
+<li><strong>Revenue percentile buckets:</strong> Use NTILE(4) to divide members into quartiles by total_points. Show the min and max points in each quartile using MIN() and MAX() after grouping by the quartile number.</li>
+<li><strong>Month-over-month location comparison:</strong> Extend the CTE+LAG pattern to calculate MoM revenue growth per location (not total). PARTITION BY location_id inside the LAG() OVER clause. Which location had the largest single-month decline?</li>
+<li><strong>Running total:</strong> Using SUM() OVER (ORDER BY month), build a cumulative revenue column alongside the monthly totals from the existing CTE. What month did cumulative revenue cross $500K?</li>
+</ol></div>
+<div class="co2 k"><strong>CTE + Window pattern:</strong> CTE builds summarized data. Window functions compare across rows. Together they handle any time-series analysis.</div>`;}},
+
+'3-6':{t:'Data Quality Audit',s:'Defensive SQL \u2014 find what is broken before it breaks your analysis.',tier:3,c(){return`
+${abar(['cs','cf','cw','cg','ch'])}
+<div class="cc"><h3>Five Checks for Every Dataset</h3><p>Run these before starting any analysis. The issues you find here determine whether your KPIs are trustworthy.</p></div>
+${sc(1,'NULL','cs','Compare two approaches',syn('COALESCE(value1, value2 [, ...])\n-- NULL count pattern\nSUM(CASE WHEN col IS NULL THEN 1 ELSE 0 END)',[['COALESCE','Returns first non-NULL argument. Use to substitute a default for missing values.'],['AVG(COALESCE(x,0))','Treats NULLs as zero. Increases denominator vs AVG(x) which excludes NULLs entirely.'],['SUM(CASE WHEN IS NULL)','Counts NULL rows explicitly. More visible than COUNT(*) - COUNT(col).']])+'AVG(COALESCE(x,0)) treats NULLs as zero. AVG(x) excludes NULLs. Both valid \u2014 document your choice.','SELECT\n  ROUND(AVG(COALESCE(tip_amount, 0)), 2) AS avg_nulls_as_zero,\n  ROUND(AVG(tip_amount), 2) AS avg_nulls_excluded,\n  SUM(CASE WHEN tip_amount IS NULL THEN 1 ELSE 0 END) AS null_count,\n  COUNT(*) AS total_rows\nFROM transactions;','Two different averages from the same column. Which do you report?',true)}
+${sc(2,'GROUP BY + HAVING','ch','Find duplicates',syn('SELECT col, COUNT(*) AS n,\n       GROUP_CONCAT(id_col) AS ids\nFROM   table\nGROUP BY col\nHAVING COUNT(*) > 1\nORDER BY n DESC',[['HAVING COUNT(*) > 1','Keeps only groups with more than one row — the duplicates.'],['GROUP_CONCAT(col)','Concatenates values in a group into a comma-separated string. Lists all duplicate IDs.'],['Near-duplicates','Data entry variation (spaces, case) prevents exact matches. TRIM() and LOWER() help expose near-duplicates.']])+opt('TRIM() — remove whitespace before grouping',['GROUP BY TRIM(LOWER(name))','WHERE TRIM(col) != col  -- flags rows with whitespace'],'TRIM(col) removes leading/trailing spaces. LTRIM / RTRIM remove one side only.')+opt('LENGTH() — flag suspicious values',['WHERE LENGTH(email) < 6','WHERE LENGTH(name) > 100','SELECT col, LENGTH(col) AS len FROM table'],'Anomalously short or long values indicate truncation errors or data entry problems.')+'GROUP BY collapses. HAVING COUNT(*) > 1 keeps only duplicates.','SELECT name, COUNT(*) AS n,\n       GROUP_CONCAT(member_id) AS ids\nFROM members\nGROUP BY name\nHAVING COUNT(*) > 1\nORDER BY n DESC;','~15 duplicate sets.')}
+${sc(3,'WHERE','cw','Date anomalies','A promotion cannot start after it ends.','SELECT promo_id, promo_name, start_date, end_date\nFROM promotions\nWHERE start_date > end_date;','Promotion 8. One record, big downstream impact.')}
+${sc(4,'LEFT JOIN','cf','Orphan records','Same pattern from Week 2. Here it flags integrity issues.','SELECT COUNT(*) AS orphan_txns\nFROM transactions t\nLEFT JOIN members m ON t.member_id = m.member_id\nWHERE m.member_id IS NULL;','~40 orphans. Revenue that cannot be attributed.')}
+${sc(5,'UNION ALL','cs','Complete audit in one query',syn('SELECT \'label_1\' AS issue, COUNT(*) AS n\nFROM   table WHERE condition_1\nUNION ALL\nSELECT \'label_2\', COUNT(*)\nFROM   table WHERE condition_2',[['UNION ALL','Stacks result sets vertically. All SELECTs must return the same number of columns.'],['vs UNION','UNION removes duplicates (slow). UNION ALL keeps all rows (fast). Always use UNION ALL in audit queries.'],['Pattern','One SELECT per check. Final result: one row per issue type, one column for count.']])+'Combine all checks into a single diagnostic output.','SELECT \'NULL tips\' AS issue,\n       SUM(CASE WHEN tip_amount IS NULL THEN 1 ELSE 0 END) AS count\nFROM transactions\nUNION ALL\nSELECT \'Duplicate members\',\n  (SELECT COUNT(*) FROM (\n    SELECT name FROM members GROUP BY name HAVING COUNT(*) > 1))\nUNION ALL\nSELECT \'Date anomalies\',\n  (SELECT COUNT(*) FROM promotions WHERE start_date > end_date)\nUNION ALL\nSELECT \'Orphan transactions\',\n  (SELECT COUNT(*) FROM transactions t\n   LEFT JOIN members m ON t.member_id = m.member_id\n   WHERE m.member_id IS NULL)\nUNION ALL\nSELECT \'Orphan promo touches\',\n  (SELECT COUNT(*) FROM promo_touches pt\n   LEFT JOIN members m ON pt.member_id = m.member_id\n   WHERE m.member_id IS NULL);','5-row diagnostic. Run this first on any new dataset.')}
+<div class="pb"><h4>Your Turn — Run the 5-Check Audit on Your MI Challenge Dataset</h4><ol>
+<li><strong>NULL impact report:</strong> Modify the NULL check from Step 1 to also report the percentage of NULLs: <code>ROUND(100.0 * null_count / total_rows, 1) AS null_pct</code>. Run it against tip_amount and total_amount. Are they the same?</li>
+<li><strong>Near-duplicate detection:</strong> The duplicates in Step 2 match on name exactly. Re-run the query using <code>TRIM(LOWER(name))</code> as the GROUP BY key. Does the duplicate count change? What does that tell you about the data entry process?</li>
+<li><strong>Extend the audit:</strong> Add a sixth check to the UNION ALL query from Step 5: transactions with a total_amount of zero or less. These are likely refunds or errors. How many exist?</li>
+<li><strong>MI Challenge prep:</strong> Run the complete 5-check audit against the tables you plan to use in Week 7. Document your findings: how many of each issue type exist, and what (if anything) will you do about each one before aggregating?</li>
+</ol></div>
+<div class="co2 d"><strong>These five issues account for the majority of incorrect KPIs in production analytics.</strong> The audit query should be your first query on any new dataset.</div>`;}},
+};
+</script>
 </body>
 </html>
