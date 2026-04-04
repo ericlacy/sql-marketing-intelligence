@@ -17,7 +17,7 @@ Two self-contained SQL learning environments for graduate marketing students. No
 2. The database loads in-memory on page open (~2 seconds)
 3. Write SQL, press **Ctrl+Enter** to run
 
-Or visit the [live site](https://[username].github.io/sql-marketing-intelligence/) to run both environments directly in your browser.
+Or visit the [live site](https://ericlacy.github.io/sql-marketing-intelligence/) to run both environments directly in your browser.
 
 ## Features
 
