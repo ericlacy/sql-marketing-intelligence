@@ -1,4 +1,23 @@
 <!DOCTYPE html>
+<!--
+  SQL Quiz Editor
+  MSMI 698 — SQL for Marketing Intelligence
+  Masagung Graduate School of Management · University of San Francisco
+
+  Version Trail
+  ─────────────────────────────────────────────────────────────────
+  v1.1.2  2026-04-04  Fix: replaced Math.random() with mulberry32(698) PRNG
+                      in seedData() — E-Commerce database is now fully
+                      deterministic across all page loads and student sessions.
+                      Two changes in seedData: r() helper and discount_applied
+                      null check. Added mulberry32() function definition.
+                      seedData(db) → seedData(db, rand).
+  v1.1.1  2026-03-xx  SQL linter, error enrichment, schema/ER modals,
+                      dark mode, sort indicators, load-more rows.
+  v1.0    2026-03-xx  Initial release — E-Commerce database seed (seed 698),
+                      sql.js WASM, USF branding, basic run/clear workflow.
+  ─────────────────────────────────────────────────────────────────
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -17,16 +36,6 @@
   --partial:#b8860b;--partialBg:#fefbe8;
   --shadow:0 1px 4px rgba(0,84,60,.07);
   --gold:var(--usf-gold);
-  --code-bg:#F0F4F1;
-  --c-select:#2E6EC7;--c-from:#1A8A4A;--c-where:#B8860B;--c-group:#9B59B6;
-  --c-having:#C0392B;--c-order:#2C3E50;--c-cte:#6C3483;--c-window:#2E86C1;
-  --c-sub:#B8860B;
-}
-[data-theme="dark"]{
-  --code-bg:#0A1610;
-  --c-select:#5B9EEF;--c-from:#3EBF7B;--c-where:#FDBB30;--c-group:#C39BD3;
-  --c-having:#EF5B5B;--c-order:#85929E;--c-cte:#9B59B6;--c-window:#2E86C1;
-  --c-sub:#FDBB30;
 }
 [data-theme="dark"]{
   --bg:#111a15;--surface:#1b2720;--surface2:#232f28;--border:#2e3f34;
@@ -119,43 +128,6 @@ table.result-table tr:hover td{background:var(--hover)}
 /* ── Status bar ──────────────────────────────────────────────────────────── */
 .status-bar{font-size:11px;color:var(--text3);padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:16px;flex-wrap:wrap}
 .status-bar .sep{color:var(--border)}
-
-/* ── Cheat Sheet Panel ───────────────────────────────────────────────────── */
-.cheat-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;backdrop-filter:blur(2px)}
-.cheat-overlay.open{display:block}
-.cheat-panel{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:95vw;background:var(--surface);border-left:1px solid var(--border);z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
-.cheat-panel.open{transform:translateX(0)}
-.cheat-hdr{padding:10px 16px;background:var(--usf-green);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.cheat-hdr h2{font-size:13px;font-weight:700;color:#fff;flex:1}
-.cheat-hdr span{font-size:9px;color:var(--usf-gold);background:rgba(253,187,48,.15);padding:2px 8px;border-radius:10px;font-weight:700}
-.cheat-close{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:14px;width:26px;height:26px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cheat-close:hover{background:rgba(255,255,255,.15)}
-.cheat-search{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
-.cheat-search input{width:100%;padding:6px 10px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;outline:none}
-.cheat-search input:focus{border-color:var(--usf-green)}
-.cheat-body{flex:1;overflow-y:auto;padding:10px 12px}
-.cheat-body::-webkit-scrollbar{width:4px}.cheat-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.cheat-week{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--usf-green);padding:8px 4px 4px;border-bottom:2px solid var(--usf-green);margin-bottom:6px;margin-top:10px}
-.cheat-week:first-child{margin-top:0}
-.cheat-entry{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden}
-.cheat-entry-hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;background:var(--surface2)}
-.cheat-entry-hdr:hover{background:var(--code-bg)}
-.cheat-entry-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;color:#fff;flex-shrink:0}
-.cheat-entry-tag.cs{background:var(--c-select)}.cheat-entry-tag.cf{background:var(--c-from)}.cheat-entry-tag.cw{background:var(--c-where);color:#1A2E22}.cheat-entry-tag.cg{background:var(--c-group)}.cheat-entry-tag.ch{background:var(--c-having)}.cheat-entry-tag.co{background:var(--c-order)}.cheat-entry-tag.ct{background:var(--c-cte)}.cheat-entry-tag.cwn{background:var(--c-window)}.cheat-entry-tag.csb{background:var(--c-sub);color:#1A2E22}.cheat-entry-tag.fmt{background:#7D4E9E}
-.cheat-entry-name{font-size:11px;font-weight:600;color:var(--text);flex:1}
-.cheat-entry-body{display:none;padding:8px 12px}
-.cheat-entry.open .cheat-entry-body{display:block}
-.cheat-entry-code{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--usf-green);background:var(--code-bg);padding:8px 10px;border-radius:6px;white-space:pre-wrap;margin-bottom:6px;line-height:1.6;cursor:pointer;border:1px solid transparent}
-.cheat-entry-code:hover{border-color:var(--usf-green)}
-[data-theme="dark"] .cheat-entry-code{color:var(--usf-gold)}
-.cheat-clauses{margin-top:4px}
-.cheat-cl{display:flex;gap:6px;font-size:10px;line-height:1.5;padding:2px 0;border-bottom:1px solid var(--border)}
-.cheat-cl:last-child{border-bottom:none}
-.cheat-cl-kw{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--usf-green);flex-shrink:0;min-width:80px}
-[data-theme="dark"] .cheat-cl-kw{color:var(--usf-gold)}
-.cheat-cl-desc{color:var(--text2);flex:1}
-.cheat-opt-badge{display:inline-block;font-size:8px;font-weight:700;text-transform:uppercase;color:var(--usf-gold);background:rgba(253,187,48,.12);padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
-.cheat-hidden{display:none}
 </style>
 </head>
 <body>
@@ -163,13 +135,10 @@ table.result-table tr:hover td{background:var(--hover)}
 <div class="header">
   <div class="header-left">
     <div>
-      <h1>Marketing Intelligence E-Commerce SQL Editor <span>v1.2</span></h1>
+      <h1>Marketing Intelligence E-Commerce SQL Editor <span>v1.1.2</span></h1>
     </div>
   </div>
-  <div class="header-btns">
-    <button class="hbtn" onclick="togCheat()" style="background:rgba(253,187,48,.2);border-color:rgba(253,187,48,.4)" title="SQL Cheat Sheet">&#128196; Cheat Sheet</button>
-    <button class="hbtn" onclick="window.open(window.location.href,'_blank')" title="Open SQL editor in a new browser tab">&#x2197; New Tab</button>
-  </div>
+
 </div>
 
 <div class="main">
@@ -229,8 +198,18 @@ table.result-table tr:hover td{background:var(--hover)}
 let db = null, resultState = {};
 
 // ── Seed ─────────────────────────────────────────────────────────────────────
+// Mulberry32 — deterministic PRNG. Always call mulberry32(seed) to get a fresh
+// generator function; each call to that function advances the sequence by one step.
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=seed+0x6D2B79F5|0;
+    var t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
 const SEED_SQL=`CREATE TABLE customers(customer_id INTEGER PRIMARY KEY,name TEXT NOT NULL,email TEXT,segment TEXT,signup_date TEXT,region TEXT,lifetime_value REAL);CREATE TABLE products(product_id INTEGER PRIMARY KEY,product_name TEXT NOT NULL,category TEXT,price REAL,margin_pct REAL);CREATE TABLE orders(order_id INTEGER PRIMARY KEY,customer_id INTEGER,order_date TEXT,total_amount REAL,discount_applied REAL,channel TEXT,status TEXT);CREATE TABLE order_items(id INTEGER PRIMARY KEY,order_id INTEGER,product_id INTEGER,quantity INTEGER,unit_price REAL);CREATE TABLE campaigns(campaign_id INTEGER PRIMARY KEY,campaign_name TEXT NOT NULL,channel TEXT,start_date TEXT,end_date TEXT,budget REAL,target_segment TEXT);CREATE TABLE campaign_touches(touch_id INTEGER PRIMARY KEY,campaign_id INTEGER,customer_id INTEGER,touch_date TEXT,response TEXT);`;
-function seedData(db){const segments=['B2B','B2C','Enterprise'],regions=['West','East','Central','South'],channels=['web','app','store'],statuses=['completed','completed','completed','completed','pending','returned','cancelled'],responses=['click','open','convert','ignore','ignore','ignore','ignore','open','click'],categories=['Electronics','Apparel','Home & Garden','Sports','Beauty','Food & Beverage'];const fn=['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','William','Elizabeth','David','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Charles','Karen','Emma','Olivia','Ava','Sophia','Mia','Liam','Noah','Ethan','Lucas','Mason','Daniel','Nancy','Matthew','Lisa','Anthony','Betty','Mark','Dorothy','Donald','Sandra','Andrew','Ashley','Steven','Kimberly','Paul','Emily','Joshua','Donna','Kenneth','Michelle','Kevin','Carol','Brian','Amanda','George','Melissa','Timothy','Deborah','Ronald','Stephanie','Edward','Rebecca','Jason','Sharon','Jeffrey','Laura','Ryan','Cynthia','Jacob','Kathleen','Gary','Amy','Nicholas','Angela','Eric','Shirley','Jonathan','Anna','Stephen','Brenda','Larry','Pamela','Justin','Katherine','Scott','Nicole','Brandon','Samantha','Benjamin','Christine','Samuel','Catherine','Gregory','Virginia','Alexander','Debra','Frank','Rachel','Patrick','Carolyn'];const ln=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Anderson','Taylor','Thomas','Moore','Jackson','Lee','Harris','Clark','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes'];const pn={Electronics:['Wireless Headphones','USB-C Hub','Portable Charger','Smart Speaker','Webcam Pro','Mechanical Keyboard','Monitor Stand','Cable Kit','Bluetooth Tracker','LED Desk Lamp'],Apparel:['Classic Tee','Denim Jacket','Running Shoes','Wool Scarf','Baseball Cap','Polo Shirt','Chino Pants','Rain Jacket','Sneakers','Cardigan'],'Home & Garden':['Plant Pot Set','LED String Lights','Throw Blanket','Wall Shelf','Candle Set','Door Mat','Picture Frame','Herb Garden Kit','Storage Basket','Cushion Cover'],Sports:['Yoga Mat','Resistance Bands','Water Bottle','Jump Rope','Foam Roller','Gym Bag','Wrist Wraps','Cycling Gloves','Sports Towel','Ankle Weights'],Beauty:['Face Serum','Lip Balm Set','Sunscreen SPF50','Hair Oil','Body Lotion','Eye Cream','Sheet Masks','Nail Polish Set','Dry Shampoo','Moisturizer'],'Food & Beverage':['Organic Coffee','Matcha Powder','Protein Bars','Olive Oil','Hot Sauce Set','Trail Mix','Herbal Tea','Granola','Honey Jar','Spice Kit']};const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,p=a=>a[r(0,a.length-1)],dt=(y,m1,m2)=>{const m=r(m1,m2),d=r(1,28);return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;};let pid=1;categories.forEach(c=>{pn[c].forEach(n=>{db.run("INSERT INTO products VALUES(?,?,?,?,?)",[pid++,n,c,(r(8,250)+r(0,99)/100).toFixed(2),(r(10,65)).toFixed(1)]);});});const ci=[];for(let i=1;i<=5000;i++){const nm=fn[(i-1)%fn.length]+' '+ln[Math.floor((i-1)/fn.length)%ln.length],em=nm.toLowerCase().replace(/ /g,'.')+i+'@example.com',sg=p(segments),yr=p([2021,2022,2023,2024]),sd=dt(yr,1,12),rg=p(regions),lv=(r(50,15000)+r(0,99)/100).toFixed(2);db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[i,nm,em,sg,sd,rg,lv]);ci.push(i);if(i%250===0)db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[5000+Math.floor(i/250),nm,em.replace('@','+dup@'),sg,sd,rg,lv]);}const cn=['Spring Push','Summer Blitz','Fall Promo','Holiday Sale','New Year Launch','B2B Outreach','Enterprise Connect','App Install Drive','Loyalty Boost','Win-Back','Flash Sale Q1','Flash Sale Q2','Flash Sale Q3','Flash Sale Q4','Brand Awareness','Referral Program','Social Media Surge','Email Re-engage','Content Series','Webinar Funnel','Product Launch A','Product Launch B','Clearance Event','VIP Preview','Regional Push'],cc=['email','social','paid_search','display','direct_mail'];for(let i=1;i<=25;i++){const ch=p(cc),sg=p(segments),yr=p([2023,2024]),sm=r(1,10),sd=dt(yr,sm,sm);let em=r(sm+1,12),ey=yr;if(em>12){em-=12;ey=yr+1;}const ed=`${ey}-${String(em).padStart(2,'0')}-${String(r(1,28)).padStart(2,'0')}`;if(i===13)db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,ed,sd,r(5000,80000),sg]);else db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,sd,ed,r(5000,80000),sg]);}for(let i=1;i<=20000;i++){const cid=p(ci),yr=p([2023,2024]),od=dt(yr,1,12),amt=(r(15,1200)+r(0,99)/100).toFixed(2),disc=Math.random()<0.3?null:(r(0,30)/100*amt).toFixed(2);db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,cid,od,amt,disc,p(channels),p(statuses)]);}for(let i=20001;i<=20050;i++)db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,r(9001,9050),dt(p([2023,2024]),1,12),(r(15,1200)+r(0,99)/100).toFixed(2),null,p(channels),p(statuses)]);let oiId=1;for(let o=1;o<=20050;o++){const n=r(1,4);for(let j=0;j<n;j++)db.run("INSERT INTO order_items VALUES(?,?,?,?,?)",[oiId++,o,r(1,60),r(1,5),(r(8,250)+r(0,99)/100).toFixed(2)]);}for(let i=1;i<=50000;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),p(ci),dt(p([2023,2024]),1,12),p(responses)]);for(let i=50001;i<=50100;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),r(9001,9050),dt(p([2023,2024]),1,12),p(responses)]);}
+function seedData(db, rand){const segments=['B2B','B2C','Enterprise'],regions=['West','East','Central','South'],channels=['web','app','store'],statuses=['completed','completed','completed','completed','pending','returned','cancelled'],responses=['click','open','convert','ignore','ignore','ignore','ignore','open','click'],categories=['Electronics','Apparel','Home & Garden','Sports','Beauty','Food & Beverage'];const fn=['James','Mary','John','Patricia','Robert','Jennifer','Michael','Linda','William','Elizabeth','David','Barbara','Richard','Susan','Joseph','Jessica','Thomas','Sarah','Charles','Karen','Emma','Olivia','Ava','Sophia','Mia','Liam','Noah','Ethan','Lucas','Mason','Daniel','Nancy','Matthew','Lisa','Anthony','Betty','Mark','Dorothy','Donald','Sandra','Andrew','Ashley','Steven','Kimberly','Paul','Emily','Joshua','Donna','Kenneth','Michelle','Kevin','Carol','Brian','Amanda','George','Melissa','Timothy','Deborah','Ronald','Stephanie','Edward','Rebecca','Jason','Sharon','Jeffrey','Laura','Ryan','Cynthia','Jacob','Kathleen','Gary','Amy','Nicholas','Angela','Eric','Shirley','Jonathan','Anna','Stephen','Brenda','Larry','Pamela','Justin','Katherine','Scott','Nicole','Brandon','Samantha','Benjamin','Christine','Samuel','Catherine','Gregory','Virginia','Alexander','Debra','Frank','Rachel','Patrick','Carolyn'];const ln=['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Anderson','Taylor','Thomas','Moore','Jackson','Lee','Harris','Clark','Lewis','Robinson','Walker','Young','Allen','King','Wright','Scott','Torres','Nguyen','Hill','Flores','Green','Adams','Nelson','Baker','Hall','Rivera','Campbell','Mitchell','Carter','Roberts','Gomez','Phillips','Evans','Turner','Diaz','Parker','Cruz','Edwards','Collins','Reyes','Stewart','Morris','Morales','Murphy','Cook','Rogers','Gutierrez','Ortiz','Morgan','Cooper','Peterson','Bailey','Reed','Kelly','Howard','Ramos','Kim','Cox','Ward','Richardson','Watson','Brooks','Chavez','Wood','James','Bennett','Gray','Mendoza','Ruiz','Hughes','Price','Alvarez','Castillo','Sanders','Patel','Myers','Long','Ross','Foster','Jimenez','Powell','Jenkins','Perry','Russell','Sullivan','Bell','Coleman','Butler','Henderson','Barnes'];const pn={Electronics:['Wireless Headphones','USB-C Hub','Portable Charger','Smart Speaker','Webcam Pro','Mechanical Keyboard','Monitor Stand','Cable Kit','Bluetooth Tracker','LED Desk Lamp'],Apparel:['Classic Tee','Denim Jacket','Running Shoes','Wool Scarf','Baseball Cap','Polo Shirt','Chino Pants','Rain Jacket','Sneakers','Cardigan'],'Home & Garden':['Plant Pot Set','LED String Lights','Throw Blanket','Wall Shelf','Candle Set','Door Mat','Picture Frame','Herb Garden Kit','Storage Basket','Cushion Cover'],Sports:['Yoga Mat','Resistance Bands','Water Bottle','Jump Rope','Foam Roller','Gym Bag','Wrist Wraps','Cycling Gloves','Sports Towel','Ankle Weights'],Beauty:['Face Serum','Lip Balm Set','Sunscreen SPF50','Hair Oil','Body Lotion','Eye Cream','Sheet Masks','Nail Polish Set','Dry Shampoo','Moisturizer'],'Food & Beverage':['Organic Coffee','Matcha Powder','Protein Bars','Olive Oil','Hot Sauce Set','Trail Mix','Herbal Tea','Granola','Honey Jar','Spice Kit']};const r=(a,b)=>Math.floor(rand()*(b-a+1))+a,p=a=>a[r(0,a.length-1)],dt=(y,m1,m2)=>{const m=r(m1,m2),d=r(1,28);return`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;};let pid=1;categories.forEach(c=>{pn[c].forEach(n=>{db.run("INSERT INTO products VALUES(?,?,?,?,?)",[pid++,n,c,(r(8,250)+r(0,99)/100).toFixed(2),(r(10,65)).toFixed(1)]);});});const ci=[];for(let i=1;i<=5000;i++){const nm=fn[(i-1)%fn.length]+' '+ln[Math.floor((i-1)/fn.length)%ln.length],em=nm.toLowerCase().replace(/ /g,'.')+i+'@example.com',sg=p(segments),yr=p([2021,2022,2023,2024]),sd=dt(yr,1,12),rg=p(regions),lv=(r(50,15000)+r(0,99)/100).toFixed(2);db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[i,nm,em,sg,sd,rg,lv]);ci.push(i);if(i%250===0)db.run("INSERT INTO customers VALUES(?,?,?,?,?,?,?)",[5000+Math.floor(i/250),nm,em.replace('@','+dup@'),sg,sd,rg,lv]);}const cn=['Spring Push','Summer Blitz','Fall Promo','Holiday Sale','New Year Launch','B2B Outreach','Enterprise Connect','App Install Drive','Loyalty Boost','Win-Back','Flash Sale Q1','Flash Sale Q2','Flash Sale Q3','Flash Sale Q4','Brand Awareness','Referral Program','Social Media Surge','Email Re-engage','Content Series','Webinar Funnel','Product Launch A','Product Launch B','Clearance Event','VIP Preview','Regional Push'],cc=['email','social','paid_search','display','direct_mail'];for(let i=1;i<=25;i++){const ch=p(cc),sg=p(segments),yr=p([2023,2024]),sm=r(1,10),sd=dt(yr,sm,sm);let em=r(sm+1,12),ey=yr;if(em>12){em-=12;ey=yr+1;}const ed=`${ey}-${String(em).padStart(2,'0')}-${String(r(1,28)).padStart(2,'0')}`;if(i===13)db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,ed,sd,r(5000,80000),sg]);else db.run("INSERT INTO campaigns VALUES(?,?,?,?,?,?,?)",[i,cn[i-1],ch,sd,ed,r(5000,80000),sg]);}for(let i=1;i<=20000;i++){const cid=p(ci),yr=p([2023,2024]),od=dt(yr,1,12),amt=(r(15,1200)+r(0,99)/100).toFixed(2),disc=rand()<0.3?null:(r(0,30)/100*amt).toFixed(2);db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,cid,od,amt,disc,p(channels),p(statuses)]);}for(let i=20001;i<=20050;i++)db.run("INSERT INTO orders VALUES(?,?,?,?,?,?,?)",[i,r(9001,9050),dt(p([2023,2024]),1,12),(r(15,1200)+r(0,99)/100).toFixed(2),null,p(channels),p(statuses)]);let oiId=1;for(let o=1;o<=20050;o++){const n=r(1,4);for(let j=0;j<n;j++)db.run("INSERT INTO order_items VALUES(?,?,?,?,?)",[oiId++,o,r(1,60),r(1,5),(r(8,250)+r(0,99)/100).toFixed(2)]);}for(let i=1;i<=50000;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),p(ci),dt(p([2023,2024]),1,12),p(responses)]);for(let i=50001;i<=50100;i++)db.run("INSERT INTO campaign_touches VALUES(?,?,?,?,?)",[i,r(1,25),r(9001,9050),dt(p([2023,2024]),1,12),p(responses)]);}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -399,7 +378,7 @@ async function init(){
     const SQL = await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${f}`});
     db = new SQL.Database();
     db.run(SEED_SQL);
-    seedData(db);
+    seedData(db, mulberry32(698));
     renderSchema();
     setStatus('Database ready &mdash; 6 tables &mdash; ~75K rows');
   } catch(e){
@@ -407,253 +386,6 @@ async function init(){
   }
 }
 init();
-</script>
-
-<!-- ── Cheat Sheet Overlay + Panel ────────────────────────────────────────── -->
-<div class="cheat-overlay" id="cheatOverlay" onclick="togCheat()"></div>
-<div class="cheat-panel" id="cheatPanel">
-  <div class="cheat-hdr">
-    <h2>SQL Cheat Sheet</h2>
-    <span>28 entries</span>
-    <button class="cheat-close" onclick="togCheat()">&#10005;</button>
-  </div>
-  <div class="cheat-search">
-    <input type="text" id="cheatSearch" placeholder="Search statements&#8230;" oninput="filterCheat(this.value)">
-  </div>
-  <div class="cheat-body" id="cheatBody"></div>
-</div>
-
-<script>
-// ── Cheat Sheet Logic ─────────────────────────────────────────────────────────
-function togCheat(){
-  const p=document.getElementById('cheatPanel'),o=document.getElementById('cheatOverlay');
-  const open=p.classList.toggle('open');
-  o.classList.toggle('open',open);
-  if(open&&!document.getElementById('cheatBody').children.length) buildCheat();
-}
-
-function filterCheat(q){
-  q=q.toLowerCase().trim();
-  document.querySelectorAll('.cheat-entry').forEach(e=>{
-    const txt=(e.querySelector('.cheat-entry-name').textContent+e.querySelector('.cheat-entry-code').textContent).toLowerCase();
-    e.classList.toggle('cheat-hidden',q&&!txt.includes(q));
-  });
-}
-
-function togCheatEntry(el){el.closest('.cheat-entry').classList.toggle('open');}
-
-function runCheatSQL(el){
-  const code=el.textContent.trim();
-  const ed=document.getElementById('sqlEditor');
-  if(ed){ed.value=code;ed.focus();}
-  togCheat();
-}
-
-const CHEAT=[
-{week:'Week 1 — Foundations',entries:[
-{tag:'cs',name:'SELECT … FROM … LIMIT',
- code:`SELECT [* | column [, column ...]]
-FROM   table_name
-[LIMIT  n]`,
- clauses:[['SELECT','Columns to return. * returns all columns.'],['FROM','The source table.'],['LIMIT','Optional. Caps the number of rows returned.']]},
-{tag:'cf',name:'INNER JOIN … ON',
- code:`SELECT t1.col, t2.col
-FROM   table1 t1
-INNER JOIN table2 t2
-  ON t1.foreign_key = t2.primary_key`,
- clauses:[['INNER JOIN','Returns only rows matching in BOTH tables. Orphans dropped silently.'],['ON','The join condition — FK in one table to PK in the other.'],['Alias','Short name after table name. Good practice always.']]},
-{tag:'cf',name:'LEFT JOIN … ON … WHERE … IS NULL',
- code:`SELECT t1.col, t2.col
-FROM   table1 t1
-LEFT JOIN table2 t2
-  ON t1.foreign_key = t2.primary_key
-[WHERE t2.primary_key IS NULL]`,
- clauses:[['LEFT JOIN','Returns ALL rows from the left table. Fills NULLs where no match exists.'],['ON','Same join condition as INNER JOIN.'],['WHERE … IS NULL','Isolates unmatched rows (orphan detection pattern).']]},
-{tag:'cw',name:'WHERE (conditions + LIKE)',
- code:`WHERE condition [AND | OR condition ...]
-WHERE col LIKE 'prefix%'
-WHERE col LIKE '%substring%'
-WHERE col LIKE 'A_C'`,
- clauses:[['WHERE','Filters rows BEFORE grouping. NULLs evaluate as UNKNOWN — use IS NULL / IS NOT NULL.'],['AND / OR','AND requires both conditions true. OR requires either.'],['LIKE','Case-insensitive text pattern. % = any sequence, _ = single character.']]},
-{tag:'cs',name:'UPPER() / LOWER()',
- code:`WHERE UPPER(city) = 'SAN FRANCISCO'
-WHERE LOWER(email) LIKE '%@gmail%'`,
- clauses:[['UPPER(col)','Converts to uppercase. Use to normalise mixed-case data.'],['LOWER(col)','Converts to lowercase.']],opt:true},
-{tag:'co',name:'ORDER BY',
- code:`ORDER BY column [ASC | DESC]
-       [, column [ASC | DESC] ...]`,
- clauses:[['ORDER BY','Sorts the result set. Applied after WHERE, GROUP BY, and HAVING.'],['ASC','Ascending (lowest first). Default if omitted.'],['DESC','Descending (highest first).'],['Multiple cols','Secondary sort for ties: ORDER BY tier, total_points DESC']]},
-{tag:'cw',name:'NULL behavior',
- code:`WHERE col IS NULL
-WHERE col IS NOT NULL
-COALESCE(col, 0)
-COALESCE(col, 'Unknown')`,
- clauses:[['IS NULL','The only correct way to test for NULL. NULL = NULL is UNKNOWN.'],['IS NOT NULL','Rows where the column has a value.'],['COALESCE','Returns the first non-NULL argument. Use to substitute a default.']]}
-]},
-{week:'Week 2 — Connecting Tables',entries:[
-{tag:'cf',name:'Multi-table JOIN chain',
- code:`SELECT a.col, b.col, c.col
-FROM   table_a a
-JOIN   table_b b ON a.id = b.a_id
-JOIN   table_c c ON b.id = c.b_id`,
- clauses:[['Chain JOINs','Each JOIN adds one more table. Follow the ER diagram path.'],['Alias','Prefix each column with its table alias.'],['Order','Start FROM the table closest to your answer. Join outward.']]},
-{tag:'cf',name:'LEFT JOIN orphan detection',
- code:`SELECT t.order_id, t.customer_id
-FROM   orders t
-LEFT JOIN customers m
-  ON t.customer_id = m.customer_id
-WHERE  m.customer_id IS NULL`,
- clauses:[['Pattern','Flip the table on the left to change which side keeps all rows.'],['WHERE IS NULL','Isolates the non-matching (orphan) rows.'],['Business meaning','~50 orders exist for deleted or invalid accounts.']]}
-]},
-{week:'Week 3 — Aggregation & KPIs',entries:[
-{tag:'cg',name:'GROUP BY + aggregate functions',
- code:`SELECT  col, COUNT(*), COUNT(DISTINCT col2),
-        AVG(col3), SUM(col4), MIN(col5), MAX(col6)
-FROM    table
-[WHERE  condition]
-GROUP BY col`,
- clauses:[['GROUP BY','Collapses rows with the same value into one summary row.'],['COUNT(*)','Counts every row, including NULLs.'],['COUNT(DISTINCT col)','Counts unique non-NULL values.'],['AVG(col)','Mean of non-NULL values. NULLs excluded from both numerator and denominator.'],['SUM / MIN / MAX','Total / smallest / largest non-NULL value.']]},
-{tag:'cs',name:'ROUND() + printf() formatting',
- code:`ROUND(value, decimal_places)
-printf('$%.2f', value)    -- $12.50
-printf('%.1f%%', value)   -- 43.2%`,
- clauses:[['ROUND(v, n)','Rounds to n decimal places.'],['printf(fmt, v)','SQLite string formatting. Use for display only.']],opt:true},
-{tag:'cs',name:'CASE WHEN … THEN … ELSE … END',
- code:`CASE WHEN condition THEN value
-     [WHEN condition THEN value ...]
-     [ELSE default_value]
-END`,
- clauses:[['CASE WHEN','Evaluates conditions in order. Returns first matching WHEN.'],['ELSE','Optional fallback. Without ELSE, unmatched rows return NULL.'],['Inside COUNT','COUNT(CASE WHEN x THEN 1 END) counts rows where condition is true.'],['Inside SUM','SUM(CASE WHEN x THEN value ELSE 0 END) — ELSE 0 prevents NULL propagating.']]},
-{tag:'cs',name:'Integer division fix',
- code:`SELECT 3 / 4;              -- 0 (wrong)
-SELECT 1.0 * 3 / 4;       -- 0.75
-SELECT CAST(3 AS REAL) / 4; -- 0.75`,
- clauses:[['Integer division','SQLite truncates integer ÷ integer. Always produces 0 for values < 1.'],['1.0 *','Forces float arithmetic.'],['CAST(v AS REAL)','Explicit type conversion. Preferred in production code.']],opt:true},
-{tag:'ch',name:'HAVING',
- code:`SELECT col, aggregate_fn(col2)
-FROM   table
-GROUP BY col
-HAVING aggregate_fn(col2) > threshold`,
- clauses:[['HAVING','Filters AFTER grouping. Operates on aggregate results.'],['vs WHERE','WHERE filters rows before grouping. They are not interchangeable.'],['Rule','Any aggregate condition (COUNT, SUM, AVG…) must go in HAVING — never WHERE.']]}
-]},
-{week:'Week 4 — Subqueries & Comparisons',entries:[
-{tag:'csb',name:'Derived table (subquery in FROM)',
- code:`SELECT outer.col, sub.col
-FROM   outer_table outer
-JOIN (
-  SELECT key_col, aggregate_fn(col) AS alias
-  FROM   inner_table
-  GROUP BY key_col
-) sub ON outer.key_col = sub.key_col`,
- clauses:[['Subquery in FROM','Any SELECT wrapped in parentheses used as a table source. Must be aliased.'],['Use case','Calculate per-group aggregates, then JOIN back to rows.'],['Execution order','Inner query runs first. Outer query reads its result as a table.']]},
-{tag:'cs',name:'SUM(CASE WHEN) pivot + BETWEEN',
- code:`SELECT  group_col,
-  SUM(CASE WHEN col BETWEEN start AND end THEN value ELSE 0 END) AS period_1,
-  SUM(CASE WHEN col BETWEEN start AND end THEN value ELSE 0 END) AS period_2
-FROM table
-GROUP BY group_col`,
- clauses:[['Pivot pattern','Creates side-by-side period columns from a single date column.'],['BETWEEN x AND y','Inclusive range. Equivalent to col >= x AND col <= y.'],['ELSE 0','Without ELSE 0, rows outside the condition contribute NULL to SUM.']]}
-]},
-{week:'Week 5 — Advanced Patterns',entries:[
-{tag:'cwn',name:'RANK() OVER (PARTITION BY … ORDER BY …)',
- code:`RANK() OVER (
-  [PARTITION BY partition_col, ...]
-   ORDER BY sort_col [ASC | DESC]
-)`,
- clauses:[['RANK()','Assigns rank within partition. Ties share rank; next rank skips (1,1,3…).'],['OVER','Required keyword for all window functions.'],['PARTITION BY','Resets rank counter per unique value.'],['DENSE_RANK()','No gaps after ties (1,1,2…).']]},
-{tag:'cwn',name:'NTILE(n) OVER (PARTITION BY … ORDER BY …)',
- code:`NTILE(number_of_buckets) OVER (
-  [PARTITION BY partition_col, ...]
-   ORDER BY sort_col [ASC | DESC]
-)`,
- clauses:[['NTILE(n)','Divides rows into n equal-sized buckets.'],['ORDER BY','Required. Determines which rows go into which bucket.'],['Filter on result','Cannot use WHERE on NTILE in the same SELECT — wrap in a subquery.']]},
-{tag:'csb',name:'Subquery wrapper for window filter',
- code:`SELECT *
-FROM (
-  SELECT col,
-         NTILE(10) OVER (
-           PARTITION BY segment
-           ORDER BY lifetime_value DESC
-         ) AS decile
-  FROM customers
-) ranked
-WHERE decile = 1`,
- clauses:[['Why wrap?','Window functions compute in SELECT phase. WHERE runs before SELECT.'],['Pattern','Compute window in inner query. Filter on result in outer WHERE.']]},
-{tag:'ct',name:'WITH … AS (CTE)',
- code:`WITH cte_name AS (
-  SELECT col, aggregate_fn(col2) AS alias
-  FROM   table
-  GROUP BY col
-)
-SELECT cte_name.col, cte_name.alias
-FROM   cte_name
-[ORDER BY col]`,
- clauses:[['WITH','Opens the CTE. Multiple CTEs: WITH a AS (...), b AS (...)'],['AS (…)','The subquery defining the CTE. Executes before the main SELECT.'],['Purpose','Named, readable steps — essential for time-series analysis.'],['Scope','CTE name available only within the same query.']]},
-{tag:'cwn',name:'LAG() OVER (ORDER BY …)',
- code:`LAG(col [, offset [, default]]) OVER (
-  [PARTITION BY partition_col]
-   ORDER BY sort_col
-)`,
- clauses:[['LAG(col)','Value of col from the previous row in the window order.'],['offset','Rows to look back. Default is 1.'],['NULL on first row','First row returns NULL — correct. Do NOT COALESCE to 0 (division by zero risk).'],['LEAD(col)','Forward-looking: returns the value from the next row.']]},
-{tag:'cs',name:"strftime() — date formatting",
- code:`strftime('%Y-%m', date_col)   -- '2024-03'
-strftime('%Y', date_col)      -- '2024'
-strftime('%m', date_col)      -- '03'`,
- clauses:[['strftime(fmt, col)','SQLite date formatting. Returns a string.'],['%Y-%m','ISO year-month. Best for GROUP BY — sorts correctly as string.'],['GROUP BY','Always GROUP BY the same strftime() expression used in SELECT.']],opt:true}
-]},
-{week:'Week 6 — Data Quality Audit',entries:[
-{tag:'cs',name:'COALESCE()',
- code:`COALESCE(value1, value2 [, ...])
-AVG(COALESCE(discount_applied, 0))
-COALESCE(region, 'Unknown')`,
- clauses:[['COALESCE','Returns the first non-NULL argument.'],['AVG(COALESCE(x, 0))','Treats NULLs as zero. Document your choice.'],['NULL impact','AVG(x) and AVG(COALESCE(x,0)) often differ — reveals NULL count.']]},
-{tag:'ch',name:'HAVING COUNT(*) > 1 — duplicate detection',
- code:`SELECT col, COUNT(*) AS n,
-       GROUP_CONCAT(id_col) AS ids
-FROM   table
-GROUP BY col
-HAVING COUNT(*) > 1
-ORDER BY n DESC`,
- clauses:[['HAVING COUNT(*) > 1','Keeps only groups with more than one row — duplicates.'],['GROUP_CONCAT(col)','Concatenates values in a group into a comma-separated string.'],['TRIM()','Remove leading/trailing whitespace before grouping to catch near-duplicates.']]},
-{tag:'cw',name:'Date anomaly detection',
- code:`WHERE start_date > end_date
-WHERE date_col > date('now')
-WHERE date_col IS NULL`,
- clauses:[["start > end","A campaign cannot begin after it ends. Campaign 13 in this dataset."],["date('now')","SQLite function returning today's date as 'YYYY-MM-DD'."],['Pattern','Any logical impossibility in date fields as a WHERE condition.']]},
-{tag:'cs',name:'UNION ALL — multi-check audit',
- code:`SELECT 'label_1' AS issue, COUNT(*) AS n
-FROM   table WHERE condition_1
-UNION ALL
-SELECT 'label_2', COUNT(*)
-FROM   table WHERE condition_2`,
- clauses:[['UNION ALL','Stacks result sets vertically. All SELECTs must return same column count.'],['vs UNION','UNION removes duplicates (slow). UNION ALL keeps all rows (fast).'],['Audit pattern','One SELECT per check. Run this first on any new dataset.']]}
-]}
-];
-
-function buildCheat(){
-  const body=document.getElementById('cheatBody');
-  const tagMap={cs:'SELECT',cf:'FROM/JOIN',cw:'WHERE',cg:'GROUP BY',ch:'HAVING',co:'ORDER BY',ct:'CTE',cwn:'WINDOW',csb:'SUBQUERY',fmt:'FORMAT'};
-  let html='';
-  CHEAT.forEach(section=>{
-    html+=`<div class="cheat-week">${section.week}</div>`;
-    section.entries.forEach(e=>{
-      const opt=e.opt?'<span class="cheat-opt-badge">Optional</span>':'';
-      const clauses=e.clauses.map(c=>`<div class="cheat-cl"><span class="cheat-cl-kw">${c[0]}</span><span class="cheat-cl-desc">${c[1]}</span></div>`).join('');
-      const label=tagMap[e.tag]||e.tag.toUpperCase();
-      html+=`<div class="cheat-entry">
-        <div class="cheat-entry-hdr" onclick="togCheatEntry(this)">
-          <span class="cheat-entry-tag ${e.tag}">${label}</span>
-          <span class="cheat-entry-name">${e.name}${opt}</span>
-        </div>
-        <div class="cheat-entry-body">
-          <div class="cheat-entry-code" onclick="runCheatSQL(this)" title="Click to load into editor">${e.code}</div>
-          <div class="cheat-clauses">${clauses}</div>
-        </div>
-      </div>`;
-    });
-  });
-  body.innerHTML=html;
-}
 </script>
 </body>
 </html>
