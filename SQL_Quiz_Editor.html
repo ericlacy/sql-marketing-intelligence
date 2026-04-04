@@ -6,6 +6,9 @@
 
   Version Trail
   ─────────────────────────────────────────────────────────────────
+  v1.2    2026-04-04  Added SQL Cheat Sheet slide-in panel (28 entries,
+                      all 6 weeks, click-to-load into editor, live search)
+                      and New Tab button to open a standalone editor window.
   v1.1.2  2026-04-04  Fix: replaced Math.random() with mulberry32(698) PRNG
                       in seedData() — E-Commerce database is now fully
                       deterministic across all page loads and student sessions.
@@ -36,6 +39,10 @@
   --partial:#b8860b;--partialBg:#fefbe8;
   --shadow:0 1px 4px rgba(0,84,60,.07);
   --gold:var(--usf-gold);
+  --code-bg:#F0F4F1;
+  --c-select:#2E6EC7;--c-from:#1A8A4A;--c-where:#B8860B;--c-group:#9B59B6;
+  --c-having:#C0392B;--c-order:#2C3E50;--c-cte:#6C3483;--c-window:#2E86C1;
+  --c-sub:#B8860B;
 }
 [data-theme="dark"]{
   --bg:#111a15;--surface:#1b2720;--surface2:#232f28;--border:#2e3f34;
@@ -45,6 +52,10 @@
   --error:#e07060;--errorBg:#2a1010;
   --partial:#e0b840;--partialBg:#1e1800;
   --shadow:0 1px 4px rgba(0,0,0,.4);
+  --code-bg:#0d1a10;
+  --c-select:#5B9EEF;--c-from:#3EBF7B;--c-where:#FDBB30;--c-group:#C39BD3;
+  --c-having:#EF5B5B;--c-order:#85929E;--c-cte:#9B59B6;--c-window:#2E86C1;
+  --c-sub:#FDBB30;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
@@ -128,6 +139,48 @@ table.result-table tr:hover td{background:var(--hover)}
 /* ── Status bar ──────────────────────────────────────────────────────────── */
 .status-bar{font-size:11px;color:var(--text3);padding:8px 14px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:16px;flex-wrap:wrap}
 .status-bar .sep{color:var(--border)}
+
+/* ── Cheat Sheet Panel ───────────────────────────────────────────────────── */
+.cheat-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;backdrop-filter:blur(3px)}
+.cheat-overlay.open{display:block}
+.cheat-panel{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:96vw;background:var(--surface);border-left:1px solid var(--border);z-index:201;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.cheat-panel.open{transform:translateX(0)}
+.cheat-hdr{padding:11px 16px;background:var(--usf-green);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cheat-hdr h2{font-size:13px;font-weight:700;color:#fff;flex:1}
+.cheat-hdr .cheat-badge{font-size:9px;color:var(--usf-gold);background:rgba(253,187,48,.18);padding:2px 8px;border-radius:10px;font-weight:700;letter-spacing:.04em}
+.cheat-close{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-size:15px;width:26px;height:26px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cheat-close:hover{background:rgba(255,255,255,.15)}
+.cheat-search{padding:8px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.cheat-search input{width:100%;padding:6px 10px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;font-size:11px;outline:none}
+.cheat-search input:focus{border-color:var(--usf-green)}
+.cheat-body{flex:1;overflow-y:auto;padding:10px 12px}
+.cheat-body::-webkit-scrollbar{width:4px}.cheat-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.cheat-week-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--usf-green);padding:8px 4px 4px;border-bottom:2px solid var(--usf-green);margin-bottom:6px;margin-top:10px}
+.cheat-week-label:first-child{margin-top:0}
+.cheat-entry{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.cheat-entry-hdr{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;background:var(--surface2)}
+.cheat-entry-hdr:hover{background:var(--code-bg)}
+.cheat-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:10px;color:#fff;flex-shrink:0}
+.cheat-tag.cs{background:var(--c-select)}.cheat-tag.cf{background:var(--c-from)}
+.cheat-tag.cw{background:var(--c-where);color:#1a2e22}.cheat-tag.cg{background:var(--c-group)}
+.cheat-tag.ch{background:var(--c-having)}.cheat-tag.co{background:var(--c-order)}
+.cheat-tag.ct{background:var(--c-cte)}.cheat-tag.cwn{background:var(--c-window)}
+.cheat-tag.csb{background:var(--c-sub);color:#1a2e22}.cheat-tag.fmt{background:#7D4E9E}
+.cheat-entry-name{font-size:11px;font-weight:600;color:var(--text);flex:1}
+.cheat-opt-badge{font-size:8px;font-weight:700;text-transform:uppercase;color:var(--usf-gold);background:rgba(253,187,48,.12);padding:1px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+.cheat-entry-body{display:none;padding:8px 12px 10px}
+.cheat-entry.open .cheat-entry-body{display:block}
+.cheat-code{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--usf-green);background:var(--code-bg);padding:9px 11px;border-radius:6px;white-space:pre-wrap;line-height:1.65;cursor:pointer;border:1px solid transparent;user-select:none;margin-bottom:5px}
+[data-theme="dark"] .cheat-code{color:var(--usf-gold)}
+.cheat-code:hover{border-color:var(--usf-green)}
+.cheat-load-hint{font-size:9px;color:var(--text3);margin-bottom:7px;font-style:italic}
+.cheat-clauses{border-top:1px solid var(--border);padding-top:4px}
+.cheat-cl{display:flex;gap:6px;font-size:10px;line-height:1.55;padding:3px 0;border-bottom:1px solid var(--border)}
+.cheat-cl:last-child{border-bottom:none}
+.cheat-cl-kw{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--usf-green);flex-shrink:0;min-width:88px;padding-top:1px}
+[data-theme="dark"] .cheat-cl-kw{color:var(--usf-gold)}
+.cheat-cl-desc{color:var(--text2);flex:1}
+.cheat-hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -135,10 +188,13 @@ table.result-table tr:hover td{background:var(--hover)}
 <div class="header">
   <div class="header-left">
     <div>
-      <h1>Marketing Intelligence E-Commerce SQL Editor <span>v1.1.2</span></h1>
+      <h1>Marketing Intelligence E-Commerce SQL Editor <span>v1.2</span></h1>
     </div>
   </div>
-
+  <div class="header-btns">
+    <button class="hbtn" onclick="togCheat()" style="background:rgba(253,187,48,.18);border-color:rgba(253,187,48,.4)" title="SQL Cheat Sheet — 28 entries">&#128196; Cheat Sheet</button>
+    <button class="hbtn" onclick="window.open(window.location.href,'_blank')" title="Open this editor in a new browser tab">&#x2197; New Tab</button>
+  </div>
 </div>
 
 <div class="main">
@@ -386,6 +442,263 @@ async function init(){
   }
 }
 init();
+</script>
+
+<!-- ═══ SQL Cheat Sheet — slide-in panel ════════════════════════════════════ -->
+<div class="cheat-overlay" id="cheatOverlay" onclick="togCheat()"></div>
+<div class="cheat-panel" id="cheatPanel" role="dialog" aria-label="SQL Cheat Sheet">
+  <div class="cheat-hdr">
+    <h2>SQL Cheat Sheet</h2>
+    <span class="cheat-badge">28 entries · click code to load</span>
+    <button class="cheat-close" onclick="togCheat()" aria-label="Close">&#10005;</button>
+  </div>
+  <div class="cheat-search">
+    <input type="text" id="cheatSearch" placeholder="Search… e.g. GROUP BY, LAG, COALESCE" oninput="filterCheat(this.value)">
+  </div>
+  <div class="cheat-body" id="cheatBody"></div>
+</div>
+
+<script>
+// ── Cheat Sheet ───────────────────────────────────────────────────────────────
+function togCheat(){
+  const p=document.getElementById('cheatPanel'),o=document.getElementById('cheatOverlay');
+  const open=p.classList.toggle('open');
+  o.classList.toggle('open',open);
+  if(open&&!document.getElementById('cheatBody').children.length) buildCheat();
+  if(open) setTimeout(()=>document.getElementById('cheatSearch').focus(),260);
+}
+function filterCheat(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.cheat-entry').forEach(e=>{
+    const txt=(e.querySelector('.cheat-entry-name').textContent+' '+e.querySelector('.cheat-code').textContent).toLowerCase();
+    e.classList.toggle('cheat-hidden',!!q&&!txt.includes(q));
+  });
+  document.querySelectorAll('.cheat-week-label').forEach(lbl=>{
+    let vis=false,sib=lbl.nextElementSibling;
+    while(sib&&!sib.classList.contains('cheat-week-label')){if(!sib.classList.contains('cheat-hidden'))vis=true;sib=sib.nextElementSibling;}
+    lbl.classList.toggle('cheat-hidden',!!q&&!vis);
+  });
+}
+function togCheatEntry(el){el.closest('.cheat-entry').classList.toggle('open');}
+function loadCheatSQL(el){
+  const ed=document.getElementById('sqlEditor');
+  if(ed){ed.value=el.textContent.trim();ed.focus();updateCharCount();}
+  togCheat();
+}
+
+const CHEAT_DATA=[
+{label:'Week 1 — SELECT · WHERE · ORDER BY',entries:[
+{tag:'cs',name:'SELECT … FROM … LIMIT',code:`SELECT [* | col1, col2, ...]
+FROM   table_name
+[LIMIT  n]`,clauses:[['SELECT','Columns to return. * returns all columns.'],['FROM','Source table.'],['LIMIT','Caps rows returned — useful when exploring schema.']]},
+{tag:'cf',name:'INNER JOIN … ON',code:`SELECT t1.col, t2.col
+FROM   table1 t1
+INNER JOIN table2 t2
+  ON t1.foreign_key = t2.primary_key`,clauses:[['INNER JOIN','Returns only rows matching in BOTH tables. Orphan rows dropped silently.'],['ON','Join condition — FK in one table matched to PK in the other.'],['Alias','Short label after table name (t1, t2). Required when col names conflict.']]},
+{tag:'cf',name:'LEFT JOIN · orphan detection',code:`SELECT t1.col, t2.col
+FROM   table1 t1
+LEFT JOIN table2 t2
+  ON t1.foreign_key = t2.primary_key
+WHERE  t2.primary_key IS NULL   -- orphan rows only`,clauses:[['LEFT JOIN','Returns ALL left-table rows. NULLs fill unmatched right-table columns.'],['WHERE IS NULL','Isolates rows with no match — the orphan detection pattern.'],['Flip sides','Put the "many" table left → orphan transactions. Put the "one" table left → members who never ordered.']]},
+{tag:'cw',name:'WHERE · AND / OR · LIKE',code:`WHERE segment = 'Enterprise'
+  AND signup_date >= '2024-01-01'
+  AND channel LIKE 'app%'
+  AND region LIKE '%West%'`,clauses:[['WHERE','Filters rows before grouping. Applied before SELECT aliases exist.'],['AND / OR','AND: both conditions true. OR: either condition true.'],['LIKE','% = any chars, _ = exactly one char. Case-insensitive.'],['IS NULL','Only correct way to test for NULL. NULL = NULL is UNKNOWN, not TRUE.']]},
+{tag:'cw',name:'NULL handling · COALESCE',code:`-- Test for NULL
+WHERE discount_applied IS NULL
+WHERE discount_applied IS NOT NULL
+
+-- Substitute a default
+COALESCE(discount_applied, 0)
+COALESCE(region, 'Unknown')`,clauses:[['IS NULL','NULL = NULL evaluates as UNKNOWN — use IS NULL to detect missing values.'],['COALESCE(a,b)','Returns first non-NULL argument — use to replace missing values.'],['AVG impact','AVG(col) excludes NULLs. AVG(COALESCE(col,0)) treats them as zero. Results differ.']]},
+{tag:'co',name:'ORDER BY · ASC / DESC · LIMIT',code:`ORDER BY lifetime_value DESC
+ORDER BY signup_date ASC, name ASC
+ORDER BY lifetime_value DESC
+LIMIT 10`,clauses:[['ORDER BY','Sorts the final result. Applied after WHERE, GROUP BY, HAVING.'],['ASC','Ascending — lowest first. Default when omitted.'],['DESC','Descending — highest first.'],['LIMIT + ORDER BY','Together = Top N rows. ORDER BY must come before LIMIT.']]}
+]},
+{label:'Week 2 — JOINs · NULL patterns',entries:[
+{tag:'cf',name:'Multi-table JOIN chain',code:`SELECT c.name, o.order_date, p.product_name
+FROM   customers c
+JOIN   orders o      ON c.customer_id = o.customer_id
+JOIN   order_items i ON o.order_id    = i.order_id
+JOIN   products p    ON i.product_id  = p.product_id
+LIMIT 20`,clauses:[['Chain JOINs','Each JOIN adds one table. Read the ER diagram path left to right.'],['Prefix columns','Qualify with table alias to avoid ambiguous column errors.'],['Start FROM','Begin from the table closest to your answer. Join outward along FK arrows.']]},
+{tag:'cf',name:'LEFT JOIN patterns · both directions',code:`-- Customers who never ordered
+SELECT c.customer_id, c.name
+FROM   customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+WHERE  o.order_id IS NULL
+
+-- Orphan orders (no matching customer)
+SELECT o.order_id, o.customer_id
+FROM   orders o
+LEFT JOIN customers c ON o.customer_id = c.customer_id
+WHERE  c.customer_id IS NULL`,clauses:[['Pattern','LEFT side keeps all rows. IS NULL on RIGHT side isolates non-matches.'],['~50 orphan orders','orders table contains customer_ids 9001–9050 with no matching customer row.'],['Business use','No-order customers → win-back list. Orphan orders → data quality audit.']]}
+]},
+{label:'Week 3 — Aggregation · HAVING · CASE',entries:[
+{tag:'cg',name:'GROUP BY · aggregate functions',code:`SELECT  segment,
+        COUNT(*)                      AS total_orders,
+        COUNT(DISTINCT customer_id)   AS unique_customers,
+        ROUND(AVG(total_amount), 2)   AS avg_order_value,
+        ROUND(SUM(total_amount), 2)   AS revenue
+FROM    orders
+GROUP BY segment`,clauses:[['GROUP BY','Collapses rows with the same value into one summary row.'],['COUNT(*)','Counts every row in the group — including NULLs.'],['COUNT(DISTINCT col)','Counts unique non-NULL values. Prevents fan-out inflation after JOINs.'],['AVG(col)','Mean of non-NULL values — NULLs excluded from numerator AND denominator.'],['SUM / MIN / MAX','Total / smallest / largest non-NULL value in the group.']]},
+{tag:'ch',name:'HAVING — filter after grouping',code:`SELECT  segment, COUNT(*) AS order_count
+FROM    orders
+GROUP BY segment
+HAVING  COUNT(*) > 500
+ORDER BY order_count DESC`,clauses:[['HAVING','Filters AFTER grouping — operates on aggregate results, not individual rows.'],['vs WHERE','WHERE filters rows before GROUP BY. They are not interchangeable.'],['Rule','Any condition involving COUNT/SUM/AVG/MIN/MAX → HAVING, never WHERE.']]},
+{tag:'cs',name:'CASE WHEN inside aggregate',code:`SELECT
+  SUM(CASE WHEN status='completed' THEN total_amount ELSE 0 END) AS completed_rev,
+  COUNT(CASE WHEN status='returned'  THEN 1 END)                 AS returns,
+  ROUND(100.0 * COUNT(CASE WHEN status='returned' THEN 1 END)
+              / COUNT(*), 1)                                      AS return_rate_pct
+FROM orders`,clauses:[['CASE WHEN','Evaluates conditions in order — returns value for first matching WHEN.'],['ELSE 0 in SUM','Without ELSE 0, non-matching rows contribute NULL, which poisons SUM.'],['ELSE omitted in COUNT','COUNT(CASE WHEN x THEN 1 END) — omitting ELSE means NULL rows are skipped (correct).'],['1.0 * / CAST','Force float division to avoid integer truncation: 100.0 * count / total']]},
+{tag:'cs',name:'Integer division — the silent trap',code:`-- WRONG: integer ÷ integer truncates
+SELECT 3 / 4;                -- returns 0
+
+-- FIX 1: multiply by 1.0
+SELECT 1.0 * 3 / 4;         -- 0.75
+
+-- FIX 2: CAST (explicit, preferred)
+SELECT CAST(3 AS REAL) / 4; -- 0.75`,clauses:[['Problem','SQLite divides two integers and drops the decimal. Any result < 1 becomes 0.'],['1.0 *','Cheapest fix — forces expression into float arithmetic.'],['CAST(v AS REAL)','More explicit. Preferred when readability matters.']]}
+]},
+{label:'Week 4 — Subqueries · Pivots',entries:[
+{tag:'csb',name:'Derived table (subquery in FROM)',code:`SELECT c.name, c.lifetime_value, avg.seg_avg
+FROM   customers c
+JOIN (
+  SELECT segment,
+         ROUND(AVG(lifetime_value), 2) AS seg_avg
+  FROM   customers
+  GROUP BY segment
+) avg ON c.segment = avg.segment
+WHERE  c.lifetime_value > 2 * avg.seg_avg
+ORDER BY c.lifetime_value DESC`,clauses:[['Subquery in FROM','Any SELECT in parentheses becomes a derived table. Must be aliased.'],['Execution order','Inner query runs first. Outer query reads its result as a named table.'],['Use case','Calculate per-group aggregates, JOIN back to rows, filter each row against its group average.']]},
+{tag:'cs',name:'CASE WHEN pivot — period comparison',code:`SELECT  segment,
+  ROUND(SUM(CASE WHEN strftime('%m', order_date)
+                   IN ('07','08','09')
+                 THEN total_amount ELSE 0 END), 2) AS q3_rev,
+  ROUND(SUM(CASE WHEN strftime('%m', order_date)
+                   IN ('10','11','12')
+                 THEN total_amount ELSE 0 END), 2) AS q4_rev
+FROM orders
+WHERE strftime('%Y', order_date) = '2024'
+GROUP BY segment`,clauses:[['Pivot pattern','Side-by-side period columns from a single date column — no JOIN required.'],['BETWEEN alternative','BETWEEN \'2024-07-01\' AND \'2024-09-30\' is equivalent to the IN months above.'],['ELSE 0','Critical — without ELSE 0, non-matching rows contribute NULL and SUM returns NULL.']]}
+]},
+{label:'Week 5 — Window Functions · CTEs',entries:[
+{tag:'cwn',name:'RANK() / DENSE_RANK() · PARTITION BY',code:`SELECT name, segment, lifetime_value,
+       RANK() OVER (
+         PARTITION BY segment
+         ORDER BY lifetime_value DESC
+       ) AS rank_in_segment
+FROM customers
+ORDER BY segment, rank_in_segment`,clauses:[['RANK()','Rank within partition. Ties share rank; next rank skips: 1, 1, 3…'],['DENSE_RANK()','No gaps after ties: 1, 1, 2…'],['OVER','Required keyword that opens the window function clause.'],['PARTITION BY','Resets rank counter for each unique value. Omit for a global rank.']]},
+{tag:'cwn',name:'NTILE(n) · top-N% per group',code:`SELECT * FROM (
+  SELECT name, segment, lifetime_value,
+         NTILE(10) OVER (
+           PARTITION BY segment
+           ORDER BY lifetime_value DESC
+         ) AS decile
+  FROM customers
+) t
+WHERE decile = 1   -- top 10% per segment`,clauses:[['NTILE(n)','Divides rows into n equal buckets and returns the bucket number 1–n.'],['Filter rule','Cannot filter on a window result in the same SELECT. Wrap in a subquery first.'],['Top 10%','NTILE(10) WHERE decile = 1 selects the first (highest) decile.']]},
+{tag:'ct',name:'WITH … AS (CTE)',code:`WITH monthly AS (
+  SELECT strftime('%Y-%m', order_date) AS month,
+         ROUND(SUM(total_amount), 2)  AS revenue
+  FROM   orders
+  WHERE  strftime('%Y', order_date) = '2024'
+  GROUP BY strftime('%Y-%m', order_date)
+)
+SELECT month, revenue
+FROM   monthly
+ORDER BY month`,clauses:[['WITH','Opens the CTE block. Multiple CTEs: WITH a AS (…), b AS (…)'],['AS (…)','The subquery defining the CTE — executes before the main SELECT.'],['Purpose','Names a complex subquery for readability. Essential for multi-step time-series work.'],['Scope','CTE name is available only within the same query statement.']]},
+{tag:'cwn',name:'LAG() · month-over-month growth',code:`WITH monthly AS (
+  SELECT strftime('%Y-%m', order_date)  AS month,
+         ROUND(SUM(total_amount), 2)    AS revenue
+  FROM   orders
+  WHERE  strftime('%Y', order_date) = '2024'
+  GROUP BY 1
+)
+SELECT month, revenue,
+       LAG(revenue) OVER (ORDER BY month) AS prev_month,
+       ROUND(100.0 *
+         (revenue - LAG(revenue) OVER (ORDER BY month))
+         / LAG(revenue) OVER (ORDER BY month), 1)   AS growth_pct
+FROM   monthly
+ORDER BY month`,clauses:[['LAG(col)','Returns col value from the previous row in window order.'],['NULL on row 1','First row has no prior row → returns NULL. Correct. Do NOT default to 0 (causes ÷0 in growth calc).'],['LEAD(col)','Forward-looking equivalent — value from the next row.'],['Partition','Add PARTITION BY location_id to compute per-location MoM growth.']]},
+{tag:'cs',name:'strftime() — date grouping',code:`strftime('%Y-%m', order_date)  -- '2024-03' ← use for GROUP BY
+strftime('%Y',    order_date)  -- '2024'
+strftime('%m',    order_date)  -- '03' (month number, 01-12)
+date('now')                    -- today's date as 'YYYY-MM-DD'`,clauses:[["'%Y-%m'",'ISO year-month — sorts correctly as text. GROUP BY this exact expression.'],["'%m'",'Month number as 2-digit string. Use in CASE WHEN to isolate quarters.'],["date('now')",'SQLite function returning today\'s date. Use in WHERE date_col > date(\'now\') for future-date checks.']],opt:true}
+]},
+{label:'Week 6 — Data Quality Audit',entries:[
+{tag:'cs',name:'COALESCE · NULL impact on averages',code:`SELECT
+  ROUND(AVG(discount_applied), 2)           AS avg_nulls_excluded,
+  ROUND(AVG(COALESCE(discount_applied,0)),2) AS avg_nulls_as_zero,
+  SUM(CASE WHEN discount_applied IS NULL
+           THEN 1 ELSE 0 END)               AS null_count,
+  COUNT(*)                                  AS total_rows
+FROM orders`,clauses:[['COALESCE(a,b)','Returns first non-NULL argument — substitutes a default for missing values.'],['AVG(col)','Excludes NULLs from numerator AND denominator. Denominator is smaller than you think.'],['AVG(COALESCE(x,0))','Treats NULLs as zero — increases the denominator. Results often differ significantly.'],['Document choice','Neither is wrong. State which you used and why in your analysis.']]},
+{tag:'ch',name:'HAVING COUNT(*) > 1 · duplicate detection',code:`SELECT name,
+       COUNT(*)                  AS occurrences,
+       GROUP_CONCAT(customer_id) AS ids
+FROM   customers
+GROUP BY name
+HAVING COUNT(*) > 1
+ORDER BY occurrences DESC`,clauses:[['HAVING COUNT(*) > 1','Keeps only groups with more than one row — the duplicates.'],['GROUP_CONCAT(col)','Concatenates group values into a comma-separated string — lists all duplicate IDs.'],['Near-duplicates','Use TRIM(LOWER(name)) as the GROUP BY key to catch whitespace and case variants.']]},
+{tag:'cw',name:'Date anomaly detection',code:`-- Campaign 13 in this dataset has start > end
+SELECT campaign_id, campaign_name, start_date, end_date
+FROM   campaigns
+WHERE  start_date > end_date
+
+-- Future dates
+WHERE  date_col > date('now')
+
+-- Missing dates
+WHERE  date_col IS NULL`,clauses:[['start > end','Campaign 13 is the seeded anomaly — start_date is after end_date.'],["date('now')",'SQLite built-in returning today\'s date as YYYY-MM-DD.'],['Pattern','Express any logical impossibility as a WHERE condition and COUNT(*) it.']]},
+{tag:'cs',name:'UNION ALL · multi-check audit query',code:`SELECT 'NULL discounts'      AS issue, COUNT(*) AS n
+FROM   orders WHERE discount_applied IS NULL
+UNION ALL
+SELECT 'Orphan orders',       COUNT(*)
+FROM   orders o
+LEFT JOIN customers c ON o.customer_id=c.customer_id
+WHERE  c.customer_id IS NULL
+UNION ALL
+SELECT 'Date anomalies',      COUNT(*)
+FROM   campaigns WHERE start_date > end_date
+UNION ALL
+SELECT 'Duplicate customers', COUNT(*)
+FROM (
+  SELECT name FROM customers
+  GROUP BY name HAVING COUNT(*) > 1
+)`,clauses:[['UNION ALL','Stacks result sets vertically. All SELECTs must return the same number of columns.'],['vs UNION','UNION deduplicates (slow). UNION ALL keeps all rows (fast). Always use UNION ALL in audit queries.'],['Pattern','One SELECT per check → one row per issue → one column for count. Run this first on any new dataset.']]}
+]}
+];
+
+const TAG_LABELS={cs:'SELECT',cf:'FROM/JOIN',cw:'WHERE',cg:'GROUP BY',ch:'HAVING',co:'ORDER BY',ct:'CTE',cwn:'WINDOW',csb:'SUBQUERY',fmt:'FORMAT'};
+
+function buildCheat(){
+  let html='';
+  CHEAT_DATA.forEach(s=>{
+    html+=`<div class="cheat-week-label">${s.label}</div>`;
+    s.entries.forEach(e=>{
+      const opt=e.opt?'<span class="cheat-opt-badge">Optional</span>':'';
+      const clauses=e.clauses.map(([k,v])=>`<div class="cheat-cl"><span class="cheat-cl-kw">${k}</span><span class="cheat-cl-desc">${v}</span></div>`).join('');
+      html+=`<div class="cheat-entry">
+<div class="cheat-entry-hdr" onclick="togCheatEntry(this)">
+  <span class="cheat-tag ${e.tag}">${TAG_LABELS[e.tag]||e.tag.toUpperCase()}</span>
+  <span class="cheat-entry-name">${e.name}${opt}</span>
+</div>
+<div class="cheat-entry-body">
+  <div class="cheat-code" onclick="loadCheatSQL(this)" title="Click to load into editor">${e.code}</div>
+  <div class="cheat-load-hint">▶ Click code block to load into editor</div>
+  <div class="cheat-clauses">${clauses}</div>
+</div>
+</div>`;
+    });
+  });
+  document.getElementById('cheatBody').innerHTML=html;
+}
 </script>
 </body>
 </html>
