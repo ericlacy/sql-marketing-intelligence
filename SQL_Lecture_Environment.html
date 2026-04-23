@@ -39,6 +39,10 @@ textarea.se:focus{border-color:var(--usf-green)}[data-theme="dark"] textarea.se:
 .sr tr:hover td{background:rgba(0,84,60,.04)}[data-theme="dark"] .sr tr:hover td{background:rgba(0,84,60,.12)}
 .sr .sinf{padding:12px;color:var(--text3);font-size:11px;font-style:italic}
 .serr{color:var(--error);padding:6px 10px;background:rgba(192,57,43,.06);border-radius:4px;font-size:11px;margin:6px}.rct{font-size:10px;color:var(--text3);padding:2px 8px}
+.sr-foot{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--border);padding:6px 8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;z-index:3}
+.sr-foot .rct{margin:0;padding:0}
+.sr-foot .sm-btn{font-size:10px;padding:4px 10px;background:var(--usf-green);color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600}
+.sr-foot .sm-btn:hover{background:var(--usf-green-dark,#003d2b)}
 .drag-handle{height:6px;cursor:ns-resize;background:var(--border);flex-shrink:0;position:relative;transition:background .15s}
 .drag-handle:hover,.drag-handle.active{background:var(--usf-green)}
 [data-theme="dark"] .drag-handle:hover,[data-theme="dark"] .drag-handle.active{background:var(--usf-gold-bright)}
@@ -135,7 +139,7 @@ textarea.se:focus{border-color:var(--usf-green)}[data-theme="dark"] textarea.se:
 </head>
 <body>
 <nav class="topnav">
-<h1>SQL Lecture Environment <span style="font-size:10px;font-weight:400;opacity:.65;letter-spacing:.04em">v1.3</span></h1><span class="dtag">&#9749; Coffee Chain</span><div class="sep"></div>
+<h1>SQL Lecture Environment <span style="font-size:10px;font-weight:400;opacity:.65;letter-spacing:.04em">v1.4</span></h1><span class="dtag">&#9749; Coffee Chain</span><div class="sep"></div>
 <button class="nb a" data-tier="1" onclick="selT(1)">Tier 1</button>
 <button class="nb" data-tier="2" onclick="selT(2)">Tier 2</button>
 <button class="nb" data-tier="3" onclick="selT(3)">Tier 3</button>
@@ -148,7 +152,7 @@ textarea.se:focus{border-color:var(--usf-green)}[data-theme="dark"] textarea.se:
 <div class="sph" onclick="document.getElementById('sqlPanel').classList.toggle('collapsed')"><span>Live SQL Editor</span><span class="sh">Ctrl+Enter to run</span><span class="tog">&#9650;</span></div>
 <div class="sql-body">
 <textarea class="se" id="ed" placeholder="Click any query block, or write your own..." spellcheck="false"></textarea>
-<div class="sc"><button class="sb sbr" onclick="run()">&#9654; Run</button><button class="sb sbc" onclick="document.getElementById('ed').value='';document.getElementById('res').innerHTML='<p class=sinf>Results appear here.</p>'">Clear</button></div>
+<div class="sc"><button class="sb sbr" onclick="run()">&#9654; Run</button><button class="sb sbc" onclick="document.getElementById('ed').value='';document.getElementById('res').innerHTML='<p class=sinf>Results appear here.</p>';lastResult=null;">Clear</button><button class="sb" onclick="exportCSV()">&#x2B07; CSV</button></div>
 <div class="sr" id="res"><p class="sinf">Results appear here.</p></div>
 </div>
 </div>
@@ -156,7 +160,7 @@ textarea.se:focus{border-color:var(--usf-green)}[data-theme="dark"] textarea.se:
 <div class="lp" id="lp"></div>
 </div>
 <script>
-let db=null;
+let db=null,lastResult=null;
 const SCH=`CREATE TABLE members(member_id INTEGER PRIMARY KEY,name TEXT NOT NULL,email TEXT,tier TEXT,join_date TEXT,city TEXT,total_points REAL);CREATE TABLE menu_items(item_id INTEGER PRIMARY KEY,item_name TEXT NOT NULL,category TEXT,size TEXT,price REAL,calories INTEGER);CREATE TABLE locations(location_id INTEGER PRIMARY KEY,store_name TEXT NOT NULL,city TEXT,state TEXT,open_date TEXT,seating_capacity INTEGER);CREATE TABLE transactions(txn_id INTEGER PRIMARY KEY,member_id INTEGER,location_id INTEGER,txn_date TEXT,total_amount REAL,tip_amount REAL,order_type TEXT,payment_method TEXT);CREATE TABLE txn_items(id INTEGER PRIMARY KEY,txn_id INTEGER,item_id INTEGER,quantity INTEGER,unit_price REAL,customization TEXT);CREATE TABLE promotions(promo_id INTEGER PRIMARY KEY,promo_name TEXT NOT NULL,channel TEXT,start_date TEXT,end_date TEXT,budget REAL,target_tier TEXT);CREATE TABLE promo_touches(touch_id INTEGER PRIMARY KEY,promo_id INTEGER,member_id INTEGER,touch_date TEXT,response TEXT);`;
 function mulberry32(seed){let t=seed;return function(){t+=0x6D2B79F5;let r=t;r=Math.imul(r^r>>>15,r|1);r^=r+Math.imul(r^r>>>7,r|61);return((r^r>>>14)>>>0)/4294967296;}}
 function seed(db){
@@ -165,7 +169,12 @@ const _rng=mulberry32(0xC0FFEE42);const _ri=(a,b)=>Math.floor(_rng()*(b-a+1))+a;
 function lintSQL(sql){const w=[];let up=sql.toUpperCase().replace(/--[^\n]*/g,'').replace(/'[^']*'/g,"''");if(/\bUNION\b/i.test(up))up=up.split(/\bUNION\b/i)[0];const aggs=/\b(COUNT|SUM|AVG|MIN|MAX)\s*\(/i;const hasGroupBy=/\bGROUP\s+BY\b/i.test(up);const hasAgg=aggs.test(up);if(hasAgg&&!hasGroupBy){const selM=up.match(/\bSELECT\b([\s\S]*?)\bFROM\b/i);if(selM){let cl=selM[1];for(let i=0;i<5;i++)cl=cl.replace(/\b\w+\s*\([^()]*\)/gi,'');cl=cl.replace(/\bCASE\b[\s\S]*?\bEND\b/gi,'').replace(/\bAS\s+\w+/gi,'');const cols=cl.split(',').map(c=>c.trim()).filter(c=>c&&c!=='*'&&!/^\d+$/.test(c)&&!/^'/.test(c)&&c.length>0);if(cols.length>0)w.push('Aggregate function without GROUP BY \u2014 non-aggregated columns may return arbitrary values. Add GROUP BY for each non-aggregated column in SELECT.');}}if(/\bHAVING\b/i.test(up)&&!hasGroupBy)w.push('HAVING without GROUP BY \u2014 HAVING filters grouped results. Did you mean WHERE?');if(/\bWHERE\b/i.test(up)&&hasGroupBy){const wm=up.match(/\bWHERE\b([\s\S]*?)(?:\bGROUP\b)/i);if(wm&&aggs.test(wm[1]))w.push('Aggregate function in WHERE \u2014 aggregates cannot be used in WHERE. Use HAVING instead.');}return w;}
 
 function fmtW(warnings){return warnings.map(w=>`<div class="sql-warn"><span class="warn-icon">\u26A0</span><div>${w}</div></div>`).join('');}
-function run(){document.getElementById('sqlPanel').classList.remove('collapsed');const sql=document.getElementById('ed').value.trim(),a=document.getElementById('res');if(!sql){a.innerHTML='<p class="sinf">Enter a query.</p>';return;}try{const res=db.exec(sql);if(!res.length){a.innerHTML='<p class="sinf">Executed. No rows.</p>';return;}const{columns,values}=res[0];let h='<table><thead><tr>';columns.forEach(c=>{h+=`<th>${esc(c)}</th>`;});h+='</tr></thead><tbody>';const s=Math.min(values.length,200);for(let i=0;i<s;i++){h+='<tr>';values[i].forEach(v=>{h+=`<td>${v===null?'<span style="opacity:.35">NULL</span>':esc(String(v))}</td>`;});h+='</tr>';}h+='</tbody></table>';h+=`<p class="rct">${values.length} row${values.length!==1?'s':''}${values.length>200?' (200 shown)':''}</p>`;const _lw=lintSQL(sql);a.innerHTML=fmtW(_lw)+h;}catch(e){a.innerHTML=`<div class="serr"><strong>Error:</strong> ${esc(e.message)}</div>`;}}
+function renderLastResult(){const a=document.getElementById('res');if(!lastResult)return;const{columns,values,shown,warnings}=lastResult;let h='<table><thead><tr>';columns.forEach(c=>{h+=`<th>${esc(c)}</th>`;});h+='</tr></thead><tbody>';const s=Math.min(values.length,shown);for(let i=0;i<s;i++){h+='<tr>';values[i].forEach(v=>{h+=`<td>${v===null?'<span style="opacity:.35">NULL</span>':esc(String(v))}</td>`;});h+='</tr>';}h+='</tbody></table>';let foot=`<p class="rct">${values.length} row${values.length!==1?'s':''}${s<values.length?` \u2014 showing ${s}`:''}</p>`;if(s<values.length){const more=Math.min(100,values.length-s);foot+=`<button class="sm-btn" onclick="showMore()">Show ${more} more row${more!==1?'s':''} \u2193</button>`;}h+=`<div class="sr-foot">${foot}</div>`;a.innerHTML=warnings+h;}
+function showMore(){if(!lastResult)return;lastResult.shown+=100;renderLastResult();}
+function run(){document.getElementById('sqlPanel').classList.remove('collapsed');const sql=document.getElementById('ed').value.trim(),a=document.getElementById('res');if(!sql){a.innerHTML='<p class="sinf">Enter a query.</p>';lastResult=null;return;}try{const res=db.exec(sql);if(!res.length){a.innerHTML='<p class="sinf">Executed. No rows.</p>';lastResult=null;return;}const{columns,values}=res[0];lastResult={columns,values,shown:100,warnings:fmtW(lintSQL(sql))};renderLastResult();}catch(e){a.innerHTML=`<div class="serr"><strong>Error:</strong> ${esc(e.message)}</div>`;lastResult=null;}}
+function toCSV(columns,values){const q=v=>{if(v===null||v===undefined)return'';const s=String(v);return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};return'\ufeff'+columns.map(q).join(',')+'\r\n'+values.map(r=>r.map(q).join(',')).join('\r\n');}
+function downloadCSV(filename,csv){const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportCSV(){if(!lastResult||!lastResult.values||!lastResult.values.length){document.getElementById('res').innerHTML='<p class="sinf">Nothing to export \u2014 run a query first.</p>';return;}const ts=new Date().toISOString().replace(/[-:T]/g,'').slice(0,14).replace(/(\d{8})(\d{6})/,'$1-$2');downloadCSV(`query-results-${ts}.csv`,toCSV(lastResult.columns,lastResult.values));}
 function lr(el){document.getElementById('sqlPanel').classList.remove('collapsed');document.getElementById('ed').value=el.textContent.trim();document.getElementById('ed').focus();run();}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function togM(){const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('mb').textContent=t==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';try{localStorage.setItem('lec_theme',t);}catch(e){}}

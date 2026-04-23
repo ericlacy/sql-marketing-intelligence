@@ -24,6 +24,8 @@ Or visit the [live site](https://ericlacy.github.io/sql-marketing-intelligence/)
 - **Tiered mastery**: 19 exercises across 3 tiers (Foundations → AI-Assisted → Full Autonomy)
 - **Auto-grading**: Diagnostic feedback on each check — not just pass/fail
 - **SQL linter**: Pre-execution warnings for missing GROUP BY, HAVING without GROUP BY, aggregate in WHERE
+- **CSV export**: Download any query's full result set as RFC 4180-compliant CSV (UTF-8 BOM for Excel)
+- **Paged results**: First 100 rows render instantly, with a sticky "Show more" button to load the rest
 - **ER diagrams**: Interactive crow's foot notation diagrams embedded in both environments
 - **Light/dark mode**: Theme toggle with persistence
 - **Zero infrastructure**: Everything runs client-side via sql.js (SQLite compiled to WebAssembly)
@@ -55,6 +57,12 @@ Both databases contain seeded data quality issues used as teaching instruments:
 - All data generated deterministically in-memory on page load
 - localStorage for progress persistence (SQL Lab) and theme preference (both)
 - No external dependencies beyond the sql.js CDN
+
+## Changelog
+
+### 2026-04-23
+- **E-Commerce Quiz Editor v1.3**: Added **Download CSV** button next to Run / Clear. Exports the full result set (not just the 100 rows currently rendered) with RFC 4180 quoting and a UTF-8 BOM so Excel opens it cleanly.
+- **Coffee Shop Lecture Environment v1.4**: Added **Download CSV** button, 100-row paging with a sticky **"Show N more rows ↓"** button pinned to the bottom of the results panel so it stays visible regardless of how far the table has been scrolled.
 
 ## License
 
